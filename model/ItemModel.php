@@ -74,6 +74,26 @@ function getItemChartData($item_id): array
     return $results;
 }
 
+function getItemBidAskData($item_id): array
+{
+    $results = [];
+    $statement = Db::getConnection()
+        ->query("SELECT item_id,
+            DATE(timestamp) as date,
+            bid,
+            ask
+        FROM bid_ask
+        WHERE bid IS NOT NULL
+            AND ask IS NOT NULL
+            AND item_id = $item_id;");
+
+    foreach ($statement as $row) {
+        array_push($results, array("date" => $row['date'], "bid" => $row['bid'], "ask" => $row['ask']));
+    }
+
+    return $results;
+}
+
 function getAllItemVolumes($period = measurementPeriod::DAY): array
 {
     $results = Db::getConnection()

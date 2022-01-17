@@ -16,7 +16,7 @@ if (filter_input(INPUT_GET, 'item_id', FILTER_VALIDATE_INT)) {
     die();
 }
 
-$stock_data = '{"success":true, "data":' . json_encode(getItemChartData($current_item_id)) . '}';
+$stock_data = '{"success":true, "data":' . json_encode(getItemChartData($current_item_id)) . ', "bid_ask":' . json_encode(getItemBidAskData($current_item_id)) . '}';
 echo $stock_data;
 
 ob_end_flush();

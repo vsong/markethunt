@@ -6,6 +6,7 @@ var eventBandFontColor = "#555555";
 var timezone = "T00:00:00"
 var daily_prices = [];
 var daily_trade_volume = [];
+var daily_bid_ask = [];
 
 // get saved date range
 if (localStorage.chartDateRanges === undefined) {
@@ -122,13 +123,20 @@ function renderChartWithItemId(itemId, chartHeaderText, markLines = []) {
                 verticalAlign: "top"
             },
             data: [{
+                name: "Bid/Ask",
+                type: "rangeArea",
+                yValueFormatString: "#,###",
+                dataPoints : daily_bid_ask,
+                color: "#baffe9",
+                markerType: "none",
+            }, {
                 showInLegend: true,
                 name: "Daily marketplace price",
                 yValueFormatString: "#,###",
                 type: "line",
                 click: onClickDatapoint,
                 dataPoints: daily_prices
-            }]
+            }, ]
         }, {
             height: 120,
             toolTip: {
@@ -164,9 +172,10 @@ function renderChartWithItemId(itemId, chartHeaderText, markLines = []) {
     document.getElementById('chartHeader').innerHTML = chartHeaderText;
 
     $.getJSON("api/stock_data/getjson.php?item_id=" + itemId, function(retval) {
-        daily_prices = []; daily_trade_volume = [];
+        daily_prices = []; daily_trade_volume = [], daily_bid_ask = [];
+
         for (var i = 0; i < retval.data.length; i++) {
-            stockChart.options.charts[0].data[0].dataPoints.push({
+            stockChart.options.charts[0].data[1].dataPoints.push({
                 x: new Date(retval.data[i].date + timezone),
                 y: Number(retval.data[i].price)
             });
@@ -175,6 +184,14 @@ function renderChartWithItemId(itemId, chartHeaderText, markLines = []) {
                 y: Number(retval.data[i].volume)
             });
         }
+
+        for (var i = 0; i < retval.bid_ask.length; i++) {
+            stockChart.options.charts[0].data[0].dataPoints.push({
+                x: new Date(retval.bid_ask[i].date + timezone),
+                y: [Number(retval.bid_ask[i].bid), Number(retval.bid_ask[i].ask)]
+            });
+        }
+
         stockChart.render();
     });
 }
