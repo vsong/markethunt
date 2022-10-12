@@ -1,2 +1,6 @@
 {
+    "require": {
+        "vlucas/phpdotenv": "^5.4",
+        "slim/slim": "^4.10"
+    }
 }
