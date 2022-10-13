@@ -1,6 +1,8 @@
 <?php
-use Slim\Http\Response as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+
+use App\Dependencies;
+use App\Routes;
+use DI\Container;
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -8,14 +10,13 @@ require __DIR__ . '/../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../config');
 $dotenv->safeLoad();
 
+$container = new Container();
+Dependencies::InjectDependencies($container);
+AppFactory::setContainer($container);
+
 $app = AppFactory::create();
-$container = $app->getContainer();
 $app->addRoutingMiddleware();
 $errorMiddleware = $app->addErrorMiddleware(false, true, true);
-
-$app->get('/test/{id}', function (Request $request, Response $response, $args) {
-    $id = $args['id'];
-    return $response->withJson(array('id' => $id));
-});
+Routes::AddRoutes($app);
 
 $app->run();

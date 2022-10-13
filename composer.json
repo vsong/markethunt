@@ -3,6 +3,12 @@
         "vlucas/phpdotenv": "^5.4",
         "slim/slim": "^4.10",
         "slim/psr7": "^1.5",
-        "slim/http": "^1.2"
+        "slim/http": "^1.2",
+        "php-di/php-di": "^6.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
     }
 }
