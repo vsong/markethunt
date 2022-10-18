@@ -4,7 +4,9 @@
         "slim/slim": "^4.10",
         "slim/psr7": "^1.5",
         "slim/http": "^1.2",
-        "php-di/php-di": "^6.4"
+        "php-di/php-di": "^6.4",
+        "ext-pdo": "*",
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {
