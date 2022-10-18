@@ -3,9 +3,11 @@
 namespace App\DataService;
 
 use App\DataTransferObject\ItemHeader;
+use App\DataTransferObject\ItemTotalVolume;
 use App\Model\ItemInfo;
 use App\Model\MarketDatapoint;
 use App\Util\DateUtils;
+use DateTime;
 use PDO;
 
 class MarketInfoQueryService
@@ -90,5 +92,52 @@ class MarketInfoQueryService
         }
 
         return $datapoints;
+    }
+
+    /**
+     * @param DateTime $fromDate
+     * @param DateTime $toDate
+     * @return ItemTotalVolume[]
+     */
+    public function getTotalVolumes(DateTime $fromDate, DateTime $toDate) {
+        $totalVolumes = [];
+
+        $statement = $this->db->prepare("
+        WITH dgv as 
+        (
+            SELECT
+                p.item_id,
+                p.`date`,
+                p.price * v.raw_volume_day as goldvol,
+                v.raw_volume_day as volume 
+            FROM
+                daily_price p LEFT JOIN daily_volume v USING (item_id, `date`) 
+            WHERE
+                v.raw_volume_day > 0
+            ORDER BY
+                item_id DESC
+        )
+        SELECT
+            dgv.item_id,
+            sum(dgv.goldvol) as total_goldvol,
+            sum(dgv.volume) as total_vol
+        FROM
+            dgv
+        WHERE
+            dgv.`date` >= :fromDate
+            AND dgv.`date` <= :toDate
+        GROUP BY
+            item_id
+        ORDER BY
+            total_goldvol DESC");
+        $statement->bindValue('fromDate', DateUtils::DateTimeToUtcIsoDate($fromDate));
+        $statement->bindValue('toDate', DateUtils::DateTimeToUtcIsoDate($toDate));
+        $statement->execute();
+
+        foreach ($statement->fetchAll() as $row) {
+            $totalVolumes[] = new ItemTotalVolume($row['item_id'], $row['total_vol'], $row['total_goldvol']);
+        }
+
+        return $totalVolumes;
     }
 }

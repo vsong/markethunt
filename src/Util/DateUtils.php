@@ -25,6 +25,10 @@ class DateUtils
         return true;
     }
 
+    public static function CurrentDateTimeUtc(): DateTime {
+        return new DateTime('now', new DateTimeZone('UTC'));
+    }
+
     /**
      * Given a DateTime object, returns an ISO date in the UTC timezone
      * @param DateTime $dateTime
