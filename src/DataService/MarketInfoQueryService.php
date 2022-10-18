@@ -6,7 +6,6 @@ use App\DataTransferObject\ItemHeader;
 use App\Model\ItemInfo;
 use App\Model\MarketDatapoint;
 use App\Util\DateUtils;
-use Cassandra\Date;
 use PDO;
 
 class MarketInfoQueryService
@@ -54,7 +53,12 @@ class MarketInfoQueryService
         return ($row === false) ? null : new ItemInfo($row['item_id'], $row['name']);
     }
 
-    public function getItemMarketHistory(int $itemId): ?array {
+    /**
+     * @param int $itemId
+     * @return MarketDatapoint[] Array of MarketDatapoints sorted by date ascending, or empty if item is not found
+     * or has no market history
+     */
+    public function getItemMarketHistory(int $itemId): array {
         /** @var MarketDatapoint[] $datapoints */
         $datapoints = [];
 
