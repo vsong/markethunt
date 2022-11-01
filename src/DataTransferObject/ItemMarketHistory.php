@@ -27,9 +27,10 @@ class ItemMarketHistory implements \JsonSerializable
         $this->marketData = $marketData;
     }
 
-    public function jsonSerialize() {
-        $array = $this->itemInfo->jsonSerialize();
-        $array['market_data'] = $this->marketData;
-        return $array;
+    public function jsonSerialize(): array {
+        return [
+            'item_info' => $this->itemInfo,
+            'market_data' => $this->marketData
+        ];
     }
 }

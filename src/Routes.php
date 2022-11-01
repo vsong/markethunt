@@ -2,19 +2,21 @@
 
 namespace App;
 
+use App\Controller\MarketAnalyticsController;
 use App\Controller\MarketInfoController;
 use Slim\App;
-use Slim\Http\Response as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Routing\RouteCollectorProxy;
 
 class Routes
 {
     public static function AddRoutes(App $app) {
-        $app->get('/all-items', [MarketInfoController::class, 'GetAllItemHeaders']);
-        $app->get('/item/{itemId}', [MarketInfoController::class, 'GetItem']);
+        $app->get('/items', [MarketInfoController::class, 'GetAllItemHeaders']);
+        $app->get('/items/{itemId}', [MarketInfoController::class, 'GetItem']);
+        $app->get('/events', [MarketInfoController::class, 'GetEventDates']);
+
         $app->group('/analytics', function (RouteCollectorProxy $group) {
-            $group->get('/total-volumes/{fromDate}[/{toDate}]', [MarketInfoController::class, 'GetTotalVolumes']);
+            $group->get('/total-volumes/{fromDate}[/{toDate}]', [MarketAnalyticsController::class, 'GetTotalVolumes']);
+            $group->get('/movers/{fromDate}', [MarketAnalyticsController::class, 'GetMarketMovement']);
         });
     }
 }

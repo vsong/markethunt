@@ -14,7 +14,7 @@ class ItemTotalVolume implements \JsonSerializable
         $this->goldVolume = $goldVolume;
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
             'item_id' => $this->itemId,
             'total_volume' => $this->volume,

@@ -25,8 +25,12 @@ class DateUtils
         return true;
     }
 
-    public static function CurrentDateTimeUtc(): DateTime {
+    public static function CurrentUtcDateTime(): DateTime {
         return new DateTime('now', new DateTimeZone('UTC'));
+    }
+
+    public static function CurrentUtcIsoDate(): string {
+        return self::DateTimeToUtcIsoDate(new DateTime('now', new DateTimeZone('UTC')));
     }
 
     /**

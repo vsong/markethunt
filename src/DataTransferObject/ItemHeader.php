@@ -20,9 +20,10 @@ class ItemHeader implements \JsonSerializable
         $this->latestMarketDatapoint = $marketDatapoint;
     }
 
-    public function jsonSerialize() {
-        $array = $this->itemInfo->jsonSerialize();
-        $array['latest_market_data'] = $this->latestMarketDatapoint;
-        return $array;
+    public function jsonSerialize(): array {
+        return [
+            'item_info' => $this->itemInfo,
+            'latest_market_data' => $this->latestMarketDatapoint
+        ];
     }
 }

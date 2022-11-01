@@ -39,26 +39,4 @@ class MarketInfoController
 
         return $response->withJson(new ItemMarketHistory($itemInfo, $marketData));
     }
-
-    public function GetTotalVolumes(Request $request, Response $response, $args) {
-        $fromDateString = $args['fromDate'];
-        $toDateString = $args['toDate'] ?? DateUtils::DateTimeToUtcIsoDate(DateUtils::CurrentDateTimeUtc());
-
-        if (DateUtils::validateISODate($fromDateString) && DateUtils::validateISODate($toDateString)) {
-            $fromDate = DateUtils::IsoDateToUtcDateTime($fromDateString);
-            $toDate = DateUtils::IsoDateToUtcDateTime($toDateString);
-        } else {
-            return ResponseUtils::Respond400($response, 'Dates must be in the format yyyy-mm-dd');
-        }
-
-        if ($fromDate >= $toDate) {
-            return ResponseUtils::Respond400($response, '"From" date must be earlier than "To" date');
-        }
-
-        return $response->withJson([
-            'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),
-            'to' => DateUtils::DateTimeToUtcIsoDate($toDate),
-            'total_volumes' => $this->marketInfoQueryService->getTotalVolumes($fromDate, $toDate)
-        ]);
-    }
 }
