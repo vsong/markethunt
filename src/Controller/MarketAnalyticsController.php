@@ -2,8 +2,7 @@
 
 namespace App\Controller;
 
-use App\DataService\MarketInfoQueryService;
-use App\DataTransferObject\ItemMarketHistory;
+use App\DataService\MarketAnalyticsQueryService;
 use App\Util\DateUtils;
 use App\Util\ResponseUtils;
 use Psr\Container\ContainerInterface;
@@ -12,10 +11,10 @@ use Slim\Http\Response as Response;
 
 class MarketAnalyticsController
 {
-    private MarketInfoQueryService $marketInfoQueryService;
+    private MarketAnalyticsQueryService $marketAnalyticsQueryService;
 
     public function __construct(ContainerInterface $container) {
-        $this->marketInfoQueryService = $container->get('marketInfoQueryService');
+        $this->marketAnalyticsQueryService = $container->get('marketAnalyticsQueryService');
     }
 
     public function GetTotalVolumes(Request $request, Response $response, $args) {
@@ -36,7 +35,7 @@ class MarketAnalyticsController
         return $response->withJson([
             'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),
             'to' => DateUtils::DateTimeToUtcIsoDate($toDate),
-            'total_volumes' => $this->marketInfoQueryService->getTotalVolumes($fromDate, $toDate)
+            'total_volumes' => $this->marketAnalyticsQueryService->getTotalVolumes($fromDate, $toDate)
         ]);
     }
 
@@ -52,7 +51,7 @@ class MarketAnalyticsController
         return $response->withJson([
             'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),
             'to' => DateUtils::CurrentUtcIsoDate(),
-            'market_movement' => $this->marketInfoQueryService->getMarketMovement($fromDate)
+            'market_movement' => $this->marketAnalyticsQueryService->getMarketMovement($fromDate)
         ]);
     }
 }

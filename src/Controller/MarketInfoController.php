@@ -39,4 +39,8 @@ class MarketInfoController
 
         return $response->withJson(new ItemMarketHistory($itemInfo, $marketData));
     }
+
+    public function GetEvents(Request $request, Response $response, $args) {
+        return $response->withJson($this->marketInfoQueryService->getEvents());
+    }
 }
