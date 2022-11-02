@@ -41,17 +41,23 @@ class MarketAnalyticsController
 
     public function GetMarketMovement(Request $request, Response $response, $args) {
         $fromDateString = $args['fromDate'];
+        $toDateString = $args['toDate'] ?? DateUtils::CurrentUtcIsoDate();
 
-        if (DateUtils::validateISODate($fromDateString)) {
+        if (DateUtils::validateISODate($fromDateString) && DateUtils::validateISODate($toDateString)) {
             $fromDate = DateUtils::IsoDateToUtcDateTime($fromDateString);
+            $toDate = DateUtils::IsoDateToUtcDateTime($toDateString);
         } else {
             return ResponseUtils::Respond400($response, 'Dates must be in the format yyyy-mm-dd');
         }
 
+        if ($fromDate >= $toDate) {
+            return ResponseUtils::Respond400($response, '"From" date must be earlier than "To" date');
+        }
+
         return $response->withJson([
             'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),
-            'to' => DateUtils::CurrentUtcIsoDate(),
-            'market_movement' => $this->marketAnalyticsQueryService->getMarketMovement($fromDate)
+            'to' => DateUtils::DateTimeToUtcIsoDate($toDate),
+            'market_movement' => $this->marketAnalyticsQueryService->getMarketMovement($fromDate, $toDate)
         ]);
     }
 }

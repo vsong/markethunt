@@ -69,24 +69,30 @@ class MarketAnalyticsQueryService
 
     /**
      * @param DateTime $fromDate
+     * @param DateTime $toDate
      * @return ItemMovement[]
      */
-    public function getMarketMovement(DateTime $fromDate): array {
+    public function getMarketMovement(DateTime $fromDate, DateTime $toDate): array {
         /** @var ItemMovement[] $result */
         $result = [];
 
-        // PDO does not allow us to use same parameter name twice, so have to use fromDate1 and fromDate2
+        // PDO does not allow us to use same parameter name twice, so have to repeat parameter names
         $statement = $this->db->prepare("
         WITH
         latest AS (
             SELECT
-                item_id,
-                price,
-                date,
-            	name
-            FROM
-                `v_latest_price`
-            WHERE date >= :fromDate1
+                p1.item_id,
+                p1.price,
+                p1.date
+            FROM daily_price p1
+            RIGHT JOIN (
+                SELECT
+                    item_id,
+                    MAX(date) AS date
+                FROM daily_price
+                    WHERE date >= :fromDate1 AND date <= :toDate1
+                GROUP BY item_id
+            ) p2 USING(item_id, date)
         ),
         past AS (
             SELECT
@@ -97,9 +103,9 @@ class MarketAnalyticsQueryService
             RIGHT JOIN (
                 SELECT
                     item_id,
-                    MAX(DATE) AS DATE
+                    MAX(date) AS date
                 FROM daily_price
-                    WHERE DATE <= :fromDate2
+                    WHERE date <= :fromDate2
                 GROUP BY item_id
             ) p2 USING(item_id, DATE)
         ),
@@ -111,12 +117,11 @@ class MarketAnalyticsQueryService
 			FROM
 				daily_volume dv
 			INNER JOIN daily_price dp USING(item_id, DATE)
-			WHERE dv.date >= (NOW() - INTERVAL 7 DAY)
+			WHERE dv.date >= (:toDate2 - INTERVAL 6 DAY) AND dv.date <= :toDate3
 			GROUP BY dv.item_id
         )
         SELECT * FROM (
             SELECT
-                latest.name,
                 latest.item_id,
                 latest.price,
                 latest.date,
@@ -129,10 +134,12 @@ class MarketAnalyticsQueryService
             INNER JOIN past USING(item_id)
             LEFT JOIN weekly_volumes v USING(item_id)
         ) AS tbl
-        WHERE change_pct <> 0
-        ORDER BY change_pct DESC, name ASC");
+        ORDER BY change_pct DESC, item_id ASC");
         $statement->bindValue('fromDate1', DateUtils::DateTimeToUtcIsoDate($fromDate));
         $statement->bindValue('fromDate2', DateUtils::DateTimeToUtcIsoDate($fromDate));
+        $statement->bindValue('toDate1', DateUtils::DateTimeToUtcIsoDate($toDate));
+        $statement->bindValue('toDate2', DateUtils::DateTimeToUtcIsoDate($toDate));
+        $statement->bindValue('toDate3', DateUtils::DateTimeToUtcIsoDate($toDate));
         $statement->execute();
 
         foreach ($statement->fetchAll() as $row) {
