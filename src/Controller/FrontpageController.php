@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Http\ServerRequest as Request;
 use Slim\Http\Response as Response;
 
 class FrontpageController

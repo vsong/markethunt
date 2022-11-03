@@ -17,12 +17,6 @@ class ItemMarketHistory implements \JsonSerializable
      * @param MarketDatapoint[] $marketData
      */
     public function __construct(ItemInfo $itemInfo, array $marketData) {
-        foreach ($marketData as $dataPoint) {
-            if ($itemInfo->itemId != $dataPoint->itemId) {
-                throw new InvalidArgumentException("Item IDs of provided itemInfo and marketData do not match");
-            }
-        }
-
         $this->itemInfo = $itemInfo;
         $this->marketData = $marketData;
     }

@@ -6,7 +6,7 @@ use App\DataService\MarketAnalyticsQueryService;
 use App\Util\DateUtils;
 use App\Util\ResponseUtils;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Http\ServerRequest as Request;
 use Slim\Http\Response as Response;
 
 class MarketAnalyticsController
@@ -21,7 +21,7 @@ class MarketAnalyticsController
         $fromDateString = $args['fromDate'];
         $toDateString = $args['toDate'] ?? DateUtils::CurrentUtcIsoDate();
 
-        if (DateUtils::validateISODate($fromDateString) && DateUtils::validateISODate($toDateString)) {
+        if (DateUtils::ValidateISODate($fromDateString) && DateUtils::ValidateISODate($toDateString)) {
             $fromDate = DateUtils::IsoDateToUtcDateTime($fromDateString);
             $toDate = DateUtils::IsoDateToUtcDateTime($toDateString);
         } else {
@@ -32,10 +32,26 @@ class MarketAnalyticsController
             return ResponseUtils::Respond400($response, '"From" date must be earlier than "To" date');
         }
 
+        $volumeData = $this->marketAnalyticsQueryService->getTotalVolumes($fromDate, $toDate);
+
+        if ($request->getQueryParam('format') === 'csv') {
+            return ResponseUtils::RespondCsv(
+                $response,
+                $volumeData,
+                [
+                    'item_id' => fn ($datapoint) => $datapoint->itemId,
+                    'total_volume' => fn ($datapoint) => $datapoint->volume,
+                    'total_gold_volume' => fn ($datapoint) => $datapoint->goldVolume
+                ],
+                "total_volumes");
+        }
+
         return $response->withJson([
             'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),
             'to' => DateUtils::DateTimeToUtcIsoDate($toDate),
-            'total_volumes' => $this->marketAnalyticsQueryService->getTotalVolumes($fromDate, $toDate)
+            'total_volume' => array_reduce($volumeData, fn ($sum, $datapoint) => $sum + $datapoint->volume, 0),
+            'total_gold_volume' => array_reduce($volumeData, fn ($sum, $datapoint) => $sum + $datapoint->goldVolume, 0),
+            'total_volumes' => $volumeData
         ]);
     }
 
@@ -43,7 +59,7 @@ class MarketAnalyticsController
         $fromDateString = $args['fromDate'];
         $toDateString = $args['toDate'] ?? DateUtils::CurrentUtcIsoDate();
 
-        if (DateUtils::validateISODate($fromDateString) && DateUtils::validateISODate($toDateString)) {
+        if (DateUtils::ValidateISODate($fromDateString) && DateUtils::ValidateISODate($toDateString)) {
             $fromDate = DateUtils::IsoDateToUtcDateTime($fromDateString);
             $toDate = DateUtils::IsoDateToUtcDateTime($toDateString);
         } else {
@@ -54,10 +70,29 @@ class MarketAnalyticsController
             return ResponseUtils::Respond400($response, '"From" date must be earlier than "To" date');
         }
 
+        $movementData = $this->marketAnalyticsQueryService->getMarketMovement($fromDate, $toDate);
+
+        if ($request->getQueryParam('format') === 'csv') {
+            return ResponseUtils::RespondCsv(
+                $response,
+                $movementData,
+                [
+                    'item_id' => fn ($datapoint) => $datapoint->itemId,
+                    'start_price' => fn ($datapoint) => $datapoint->startPrice,
+                    'start_date' => fn ($datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->startDate),
+                    'end_price' => fn ($datapoint) => $datapoint->endPrice,
+                    'end_date' => fn ($datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->endDate),
+                    'percent_change' => fn ($datapoint) => $datapoint->getPercentChange(),
+                    'weekly_volume' => fn ($datapoint) => $datapoint->weeklyVolume,
+                    'weekly_gold_volume' => fn ($datapoint) => $datapoint->weeklyGoldVolume,
+                ],
+                "movers");
+        }
+
         return $response->withJson([
             'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),
             'to' => DateUtils::DateTimeToUtcIsoDate($toDate),
-            'market_movement' => $this->marketAnalyticsQueryService->getMarketMovement($fromDate, $toDate)
+            'market_movement' => $movementData
         ]);
     }
 }

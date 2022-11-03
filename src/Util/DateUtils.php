@@ -13,7 +13,7 @@ class DateUtils
      * @param string $dateString The string to check
      * @return bool Result of validation
      */
-    public static function validateISODate(string $dateString): bool
+    public static function ValidateISODate(string $dateString): bool
     {
         // check datestring is an actual date in ISO format
         $parsed_date = date_parse_from_format('Y-m-d', $dateString);
@@ -52,7 +52,7 @@ class DateUtils
      */
     public static function IsoDateToUtcDateTime(string $dateString): DateTime
     {
-        if (!self::validateISODate($dateString)) {
+        if (!self::ValidateISODate($dateString)) {
             throw new InvalidArgumentException('Provided an incorrectly formatted date string');
         }
 

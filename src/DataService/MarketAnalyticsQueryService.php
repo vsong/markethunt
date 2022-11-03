@@ -90,7 +90,7 @@ class MarketAnalyticsQueryService
                     item_id,
                     MAX(date) AS date
                 FROM daily_price
-                    WHERE date >= :fromDate1 AND date <= :toDate1
+                    WHERE date > :fromDate1 AND date <= :toDate1
                 GROUP BY item_id
             ) p2 USING(item_id, date)
         ),
