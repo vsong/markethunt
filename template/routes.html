@@ -43,31 +43,31 @@
 <body>
 <div class="center-text">
     <h1>Markethunt API</h1>
-    <p>Documentation for the API powering the <a href="https://{{markethunt_app_hostname}}">Markethunt</a> app</p>
+    <p><a href="https://{{markethunt_app_hostname}}">Markethunt</a> API endpoints</p>
 </div>
 <h2>Historical Marketplace Data</h2>
 <section>
     <p class="api-link">https://{{api_hostname}}/items</p>
     <p>Get information about all items on the marketplace and their latest price and volume.</p>
-    <p><a href="/items">Example</a> | <a href="/items?format=csv">Download as CSV</a></p>
+    <p><a href="/items">Example</a> | <a href="/items?format=csv">Example (CSV)</a></p>
 
 </section>
 <section>
     <p class="api-link">https://{{api_hostname}}/items/<strong>{itemId}</strong></p>
     <p>Get information about an item and its marketplace history.</p>
-    <p><a href="/items/926">Example</a> | <a href="/items/926?format=csv">Download as CSV</a></p>
+    <p><a href="/items/926">Example</a> | <a href="/items/926?format=csv">Example (CSV)</a></p>
 </section>
 <h2>Marketplace Analytics</h2>
 <section>
     <p class="api-link">https://{{api_hostname}}/analytics/total-volumes/<strong>{from}</strong>[/<strong>{to}</strong>]</p>
     <p>Get total trade volume of all active items between two dates. The <code>to</code> date is optional and defaults to today.</p>
-    <p><a href="/analytics/total-volumes/2022-09-01/2022-10-01">Example</a> | <a href="/analytics/total-volumes/2022-09-01/2022-10-01?format=csv">Download as CSV</a></p>
+    <p><a href="/analytics/total-volumes/2022-09-01/2022-10-01">Example</a> | <a href="/analytics/total-volumes/2022-09-01/2022-10-01?format=csv">Example (CSV)</a></p>
 </section>
 <section>
     <p class="api-link">https://{{api_hostname}}/analytics/movers/<strong>{from}</strong>[/<strong>{to}</strong>]</p>
     <p>Get price movement information of all active items between two dates. The <code>to</code> date is optional and defaults to today.</p>
     <p><em>Note</em>: weekly volume is measured in the 7-day period preceding the <code>to</code> date and can be zero if the item has very low market activity.</p>
-    <p><a href="/analytics/movers/2022-10-01/2022-10-14">Example</a> | <a href="/analytics/movers/2022-10-01/2022-10-14?format=csv">Download as CSV</a></p>
+    <p><a href="/analytics/movers/2022-10-01/2022-10-14">Example</a> | <a href="/analytics/movers/2022-10-01/2022-10-14?format=csv">Example (CSV)</a></p>
 </section>
 <h2>Misc</h2>
 <section>
