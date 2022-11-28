@@ -6,51 +6,8 @@
 {% endblock %}
 
 {% block body %}
-<div id="message-text">Importing your inventory...</div>
-<script>
-    function processImportData() {
-        var itemMetadata = {{ item_metadata | json_encode | raw }};
-        var importData = {{ import_data | json_encode | raw }};
-        var importPortfolioName = '{{ import_portfolio_name | e('js') | raw }}';
-
-        if (importPortfolioName.length < 1) {
-            $('#message-text').html('Portfolio name cannot be empty');
-            return;
-        }
-
-        if (importData instanceof Array) {
-            $('#message-text').html('Invalid data. Please <a href="https://greasyfork.org/en/scripts/441382-markethunt-plugin-for-mousehunt">update the Markethunt plugin</a> and try again.');
-            return;
-        }
-
-
-        var importPortfolio = newPortfolioObject(importPortfolioName);
-        importPortfolio.inventory_gold = importData.inventoryGold;
-
-        importData.itemsArray.forEach(function(item) {
-            let itemId = item[0];
-            let itemQty = item[1];
-
-            if (!Number.isInteger(itemQty)) {
-                return;
-            }
-
-            if (itemId in itemMetadata) {
-                if (itemMetadata[itemId].latest_price !== null) {
-                    var itemPrice = itemMetadata[itemId].latest_price;
-                } else {
-                    var itemPrice = 1;
-                }
-                importPortfolio.positions.push(newPortfolioPosition(itemId, itemQty, itemPrice));
-            }
-        });
-
-        var portfolios = getPortfolioObj();
-        portfolios.push(importPortfolio);
-        setPortfolioObj(portfolios);
-
-        $('#message-text').html(`Inventory imported as '${importPortfolioName}'. <a href="/portfolio.php">Go to your portfolios</a> to view your imported data.`);
-    }
-    processImportData();
-</script>
+<div id="message-text" style="padding: 1em 0.5em">
+    Unable to import inventory data because you are using an outdated plugin version.
+    Please <b><a href="https://greasyfork.org/en/scripts/441382-markethunt-plugin-for-mousehunt">update the Markethunt plugin</a></b> and try again.
+</div>
 {% endblock %}

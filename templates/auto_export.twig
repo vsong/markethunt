@@ -24,7 +24,7 @@
             event.source.postMessage(message, event.origin);
 
             console.log('foo');
-            messageElement.innerHTML = `Data has been sent to ${newHost}. You can now close this tab.`;
+            messageElement.innerHTML = `Data has been migrated to ${newHost}. You can now close this tab.`;
         }
 
         window.addEventListener('message', function(event) {
