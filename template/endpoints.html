@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Markethunt backend API documentation">
 
     <title>Markethunt API</title>
 
@@ -43,7 +44,7 @@
 <body>
 <div class="center-text">
     <h1>Markethunt API</h1>
-    <p><a href="https://{{markethunt_app_hostname}}">Markethunt</a> API endpoints</p>
+    <p>Documentation for <a href="https://{{markethunt_app_hostname}}">Markethunt</a> API endpoints</p>
 </div>
 <h2>Historical Marketplace Data</h2>
 <section>
@@ -66,13 +67,12 @@
 <section>
     <p class="api-link">https://{{api_hostname}}/analytics/movers/<strong>{from}</strong>[/<strong>{to}</strong>]</p>
     <p>Get price movement information of all active items between two dates. The <code>to</code> date is optional and defaults to today.</p>
-    <p><em>Note</em>: weekly volume is measured in the 7-day period preceding the <code>to</code> date and can be zero if the item has very low market activity.</p>
     <p><a href="/analytics/movers/2022-10-01/2022-10-14">Example</a> | <a href="/analytics/movers/2022-10-01/2022-10-14?format=csv">Example (CSV)</a></p>
 </section>
 <h2>Misc</h2>
 <section>
     <p class="api-link">https://{{api_hostname}}/events</p>
-    <p>Get event start and end dates.</p>
+    <p>Get event start and end dates (> August 2020 only).</p>
     <p><a href="/events">Example</a></p>
 </section>
 </body>

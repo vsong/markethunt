@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\DataService\MarketAnalyticsQueryService;
+use App\DataTransferObject\ItemMovement;
+use App\DataTransferObject\ItemTotalVolume;
 use App\Util\DateUtils;
 use App\Util\ResponseUtils;
 use Psr\Container\ContainerInterface;
@@ -32,6 +34,10 @@ class MarketAnalyticsController
             return ResponseUtils::Respond400($response, '"From" date must be earlier than "To" date');
         }
 
+        if ($fromDate < DateUtils::IsoDateToUtcDateTime('2021-12-01')) {
+            return ResponseUtils::Respond404($response, 'Volume data does not exist before December 1, 2021');
+        }
+
         $volumeData = $this->marketAnalyticsQueryService->getTotalVolumes($fromDate, $toDate);
 
         if ($request->getQueryParam('format') === 'csv') {
@@ -39,9 +45,9 @@ class MarketAnalyticsController
                 $response,
                 $volumeData,
                 [
-                    'item_id' => fn ($datapoint) => $datapoint->itemId,
-                    'total_volume' => fn ($datapoint) => $datapoint->volume,
-                    'total_gold_volume' => fn ($datapoint) => $datapoint->goldVolume
+                    'item_id' => fn (ItemTotalVolume $datapoint) => $datapoint->itemId,
+                    'total_volume' => fn (ItemTotalVolume $datapoint) => $datapoint->volume,
+                    'total_gold_volume' => fn (ItemTotalVolume $datapoint) => $datapoint->goldVolume
                 ],
                 "total_volumes");
         }
@@ -49,8 +55,14 @@ class MarketAnalyticsController
         return $response->withJson([
             'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),
             'to' => DateUtils::DateTimeToUtcIsoDate($toDate),
-            'total_volume' => array_reduce($volumeData, fn ($sum, $datapoint) => $sum + $datapoint->volume, 0),
-            'total_gold_volume' => array_reduce($volumeData, fn ($sum, $datapoint) => $sum + $datapoint->goldVolume, 0),
+            'total_volume' => array_reduce(
+                $volumeData,
+                fn ($sum, ItemTotalVolume $datapoint) => $sum + $datapoint->volume,
+                0),
+            'total_gold_volume' => array_reduce(
+                $volumeData,
+                fn ($sum, ItemTotalVolume $datapoint) => $sum + $datapoint->goldVolume,
+                0),
             'total_volumes' => $volumeData
         ]);
     }
@@ -70,6 +82,10 @@ class MarketAnalyticsController
             return ResponseUtils::Respond400($response, '"From" date must be earlier than "To" date');
         }
 
+        if ($fromDate < DateUtils::IsoDateToUtcDateTime('2020-08-20')) {
+            return ResponseUtils::Respond404($response, 'Price data does not exist before August 20, 2020');
+        }
+
         $movementData = $this->marketAnalyticsQueryService->getMarketMovement($fromDate, $toDate);
 
         if ($request->getQueryParam('format') === 'csv') {
@@ -77,14 +93,14 @@ class MarketAnalyticsController
                 $response,
                 $movementData,
                 [
-                    'item_id' => fn ($datapoint) => $datapoint->itemId,
-                    'start_price' => fn ($datapoint) => $datapoint->startPrice,
-                    'start_date' => fn ($datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->startDate),
-                    'end_price' => fn ($datapoint) => $datapoint->endPrice,
-                    'end_date' => fn ($datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->endDate),
-                    'percent_change' => fn ($datapoint) => $datapoint->getPercentChange(),
-                    'weekly_volume' => fn ($datapoint) => $datapoint->weeklyVolume,
-                    'weekly_gold_volume' => fn ($datapoint) => $datapoint->weeklyGoldVolume,
+                    'item_id' => fn (ItemMovement $datapoint) => $datapoint->itemId,
+                    'start_price' => fn (ItemMovement $datapoint) => $datapoint->startPrice,
+                    'start_date' => fn (ItemMovement $datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->startDate),
+                    'end_price' => fn (ItemMovement $datapoint) => $datapoint->endPrice,
+                    'end_date' => fn (ItemMovement $datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->endDate),
+                    'percent_change' => fn (ItemMovement $datapoint) => $datapoint->getPercentChange(),
+                    'period_volume' => fn (ItemMovement $datapoint) => $datapoint->periodVolume,
+                    'period_gold_volume' => fn (ItemMovement $datapoint) => $datapoint->periodGoldVolume,
                 ],
                 "movers");
         }

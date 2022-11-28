@@ -109,15 +109,15 @@ class MarketAnalyticsQueryService
                 GROUP BY item_id
             ) p2 USING(item_id, DATE)
         ),
-        weekly_volumes AS (
+        period_volumes AS (
             SELECT
 				dv.item_id,
-				sum(dp.price * dv.raw_volume_day) AS weekly_gold_volume,
-				sum(dv.raw_volume_day) AS weekly_volume
+				sum(dp.price * dv.raw_volume_day) AS period_gold_volume,
+				sum(dv.raw_volume_day) AS period_volume
 			FROM
 				daily_volume dv
 			INNER JOIN daily_price dp USING(item_id, DATE)
-			WHERE dv.date >= (:toDate2 - INTERVAL 6 DAY) AND dv.date <= :toDate3
+			WHERE dv.date >= :fromDate3 AND dv.date <= :toDate2
 			GROUP BY dv.item_id
         )
         SELECT * FROM (
@@ -128,18 +128,18 @@ class MarketAnalyticsQueryService
                 past.past_price,
                 past.past_date,
                 CAST(latest.price / past.past_price * 100 - 100 AS DOUBLE) AS change_pct,
-				v.weekly_gold_volume,
-				v.weekly_volume
+				v.period_gold_volume,
+				v.period_volume
             FROM latest
             INNER JOIN past USING(item_id)
-            LEFT JOIN weekly_volumes v USING(item_id)
+            LEFT JOIN period_volumes v USING(item_id)
         ) AS tbl
         ORDER BY change_pct DESC, item_id ASC");
         $statement->bindValue('fromDate1', DateUtils::DateTimeToUtcIsoDate($fromDate));
         $statement->bindValue('fromDate2', DateUtils::DateTimeToUtcIsoDate($fromDate));
+        $statement->bindValue('fromDate3', DateUtils::DateTimeToUtcIsoDate($fromDate));
         $statement->bindValue('toDate1', DateUtils::DateTimeToUtcIsoDate($toDate));
         $statement->bindValue('toDate2', DateUtils::DateTimeToUtcIsoDate($toDate));
-        $statement->bindValue('toDate3', DateUtils::DateTimeToUtcIsoDate($toDate));
         $statement->execute();
 
         foreach ($statement->fetchAll() as $row) {
@@ -149,8 +149,8 @@ class MarketAnalyticsQueryService
                 DateUtils::IsoDateToUtcDateTime($row['past_date']),
                 $row['price'],
                 DateUtils::IsoDateToUtcDateTime($row['date']),
-                $row['weekly_volume'] ?? 0,
-                $row['weekly_gold_volume'] ?? 0
+                $row['period_volume'] ?? 0,
+                $row['period_gold_volume'] ?? 0
             );
         }
 

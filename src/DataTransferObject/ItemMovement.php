@@ -13,18 +13,18 @@ class ItemMovement implements JsonSerializable
     public DateTime $startDate;
     public int $endPrice;
     public DateTime $endDate;
-    public int $weeklyVolume;
-    public int $weeklyGoldVolume;
+    public int $periodVolume;
+    public int $periodGoldVolume;
 
-    public function __construct(int $itemId, int $startPrice, DateTime $startDate, int $endPrice, DateTime $endDate, int $weeklyVolume, int $weeklyGoldVolume)
+    public function __construct(int $itemId, int $startPrice, DateTime $startDate, int $endPrice, DateTime $endDate, int $periodVolume, int $periodGoldVolume)
     {
         $this->itemId = $itemId;
         $this->startPrice = $startPrice;
         $this->startDate = $startDate;
         $this->endPrice = $endPrice;
         $this->endDate = $endDate;
-        $this->weeklyVolume = $weeklyVolume;
-        $this->weeklyGoldVolume = $weeklyGoldVolume;
+        $this->periodVolume = $periodVolume;
+        $this->periodGoldVolume = $periodGoldVolume;
     }
 
     public function getPercentChange(): float {
@@ -39,8 +39,8 @@ class ItemMovement implements JsonSerializable
             'end_price' => $this->endPrice,
             'end_date' => DateUtils::DateTimeToUtcIsoDate($this->endDate),
             'percent_change' => $this->getPercentChange(),
-            'weekly_volume' => $this->weeklyVolume,
-            'weekly_gold_volume' => $this->weeklyGoldVolume
+            'period_volume' => $this->periodVolume,
+            'period_gold_volume' => $this->periodGoldVolume
         ];
     }
 }

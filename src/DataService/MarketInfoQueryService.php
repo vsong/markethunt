@@ -3,13 +3,10 @@
 namespace App\DataService;
 
 use App\DataTransferObject\ItemHeader;
-use App\DataTransferObject\ItemMovement;
-use App\DataTransferObject\ItemTotalVolume;
 use App\Model\Event;
 use App\Model\ItemInfo;
 use App\Model\MarketDatapoint;
 use App\Util\DateUtils;
-use DateTime;
 use PDO;
 
 class MarketInfoQueryService
