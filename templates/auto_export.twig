@@ -1,0 +1,50 @@
+{% extends "base.twig" %}
+{% block title %}Migrate user data{% endblock %}
+
+{% block head %}
+{{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div style="max-width: 1000px; margin: auto; text-align: center">
+        <h1>Data Export</h1>
+        <div id="export-message"></div>
+    </div>
+
+    <script>
+        var newHost = '{{ new_host }}';
+        var messageElement = document.getElementById('export-message');
+
+        function onExportUserDataCommand(event) {
+            var message = {
+                message: 'importUserDataCommand',
+                data: getUserDataString()
+            };
+
+            event.source.postMessage(message, event.origin);
+
+            console.log('foo');
+            messageElement.innerHTML = `Data has been sent to ${newHost}. You can now close this tab.`;
+        }
+
+        window.addEventListener('message', function(event) {
+            if (event.origin !== `https://${newHost}`) {
+                return;
+            }
+
+            if (event.data.message === 'exportUserDataCommand') {
+                onExportUserDataCommand(event);
+            }
+        });
+
+        window.addEventListener('load', () => {
+            if (window.opener !== null) {
+                window.opener.postMessage({message: 'exportReadyMessage'}, `https://${newHost}`);
+                messageElement.innerHTML = `<p>Connection with ${newHost} established.</p><p>If you still see this message, close this tab and use the manual import option.</p>`;
+            } else {
+                messageElement.innerHTML = `Could not set up connection with ${newHost}. Please close this tab and use the manual import option.`
+            }
+
+        })
+    </script>
+{% endblock %}

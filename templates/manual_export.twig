@@ -1,0 +1,28 @@
+{% extends "base.twig" %}
+{% block title %}Migrate user data{% endblock %}
+
+{% block head %}
+{{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div style="max-width: 1000px; margin: auto; text-align: center">
+        <h1>Manual data export</h1>
+        <p>Your Markethunt data is in the box below.</p>
+        <textarea id="export-textarea" rows="5" style="width: 50%"></textarea>
+        <p><button class="pure-button pure-button-primary" onclick="copyToClipboard()">Copy to clipboard</button></p>
+    </div>
+
+    <script>
+        const userDataString =  getUserDataString();
+        const exportTextArea = document.getElementById('export-textarea');
+
+        exportTextArea.value = userDataString;
+
+        function copyToClipboard() {
+            exportTextArea.select();
+            navigator.clipboard.writeText(userDataString);
+            alert('User data has been copied to your clipboard');
+        }
+    </script>
+{% endblock %}

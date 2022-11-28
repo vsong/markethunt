@@ -181,3 +181,15 @@ function importWatchlist(string) {
     setWatchlistObj(object);
     console.log(`imported ${getWatchlistObj().length} watchlists`)
 }
+
+function getUserDataString() {
+     let data = {};
+     data[getPortfolioObjKey()] = getPortfolioObj();
+     data[getWatchlistObjKey()] = getWatchlistObj();
+
+     return LZUTF8.compress(JSON.stringify(data), {"outputEncoding": "Base64"});
+}
+
+function decodeUserDataString(str) {
+    return JSON.parse(LZUTF8.decompress(str, {"inputEncoding": "Base64"}));
+}
