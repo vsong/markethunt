@@ -51,15 +51,6 @@
         
         <div id="main-toolbar" class="toolbar highlight">
             <div class="toolbar-left">
-                <b><a href=index.php>Main page</a></b>
-                | <b><a href="/watchlist.php">Watchlist</a></b>
-                | <b><a href="/portfolio.php">Portfolio</a></b>
-                | <a href="/highestvolumes.php">Highest volume items</a>
-                | Top movers: <a href="/top.php?period=day">day</a>
-                <a href="/top.php?period=week">week</a>
-                <a href="/top.php?period=month">month</a>
-                <a href="/top.php?period=qtr">qtr</a>
-                <a href="/top.php?period=year">year</a>
                 {% if constant('APPENV') == 'dev' %}
                     <span id="dev-warning" style="background-color: rgb(218, 0, 0); padding: 0px 3px">
                         You are browsing the test site. Data loss can occur.
@@ -69,9 +60,6 @@
                 {% endif %}
             </div>
             <div class="toolbar-right">
-                <div style="height: 5px">
-                    <a href="https://github.com/vsong/markethunt"><img src="/assets/img/GitHub-Mark-Light-32px.png" alt="GitHub"></a>
-                </div>
             </div>
         </div>
         {% block body %}
