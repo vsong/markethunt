@@ -132,6 +132,8 @@ class MarketInfoQueryService
             DateUtils::IsoDateToUtcDateTime('2022-06-21'), DateUtils::IsoDateToUtcDateTime('2022-07-05'));
         $result[] = new Event("Hween '22",
             DateUtils::IsoDateToUtcDateTime('2022-10-12'), DateUtils::IsoDateToUtcDateTime('2022-11-02'));
+        $result[] = new Event("GWH '22",
+            DateUtils::IsoDateToUtcDateTime('2022-12-06'), DateUtils::IsoDateToUtcDateTime('2023-01-04'));
 
         return $result;
     }
