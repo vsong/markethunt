@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\DataService\MarketInfoQueryService;
 use App\DataTransferObject\ItemMarketHistory;
+use App\DataTransferObject\ItemStockHistory;
 use App\Util\CsvUtils;
 use App\Util\DateUtils;
 use App\Util\ResponseUtils;
@@ -46,7 +47,7 @@ class MarketInfoController
         return $response->withJson($this->marketInfoQueryService->getAllItemHeaders());
     }
 
-    public function GetItem(Request $request, Response $response, $args) {
+    public function GetItemMarketData(Request $request, Response $response, $args) {
         $itemId = filter_var($args['itemId'], FILTER_VALIDATE_INT);
 
         if ($itemId === false) {
@@ -71,6 +72,33 @@ class MarketInfoController
         }
 
         return $response->withJson(new ItemMarketHistory($itemInfo, $marketData));
+    }
+
+    public function GetItemStockData(Request $request, Response $response, $args) {
+        $itemId = filter_var($args['itemId'], FILTER_VALIDATE_INT);
+
+        if ($itemId === false) {
+            return ResponseUtils::Respond400($response, 'Item ID must be numeric');
+        }
+
+        $itemInfo = $this->marketInfoQueryService->getItemInfo($itemId);
+
+        if ($itemInfo === null) {
+            return ResponseUtils::Respond404($response, 'Item ID not found');
+        }
+
+        $stockData = $this->marketInfoQueryService->getItemStockHistory($itemId);
+
+        if ($request->getQueryParam('format') === 'csv') {
+            return ResponseUtils::RespondCsv($response, $stockData, [
+                'timestamp' => fn ($datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->timestamp),
+                'bid' => fn ($datapoint) => $datapoint->bid,
+                'ask' => fn ($datapoint) => $datapoint->ask,
+                'supply' => fn ($datapoint) => $datapoint->supply
+            ]);
+        }
+
+        return $response->withJson(new ItemStockHistory($itemInfo, $stockData));
     }
 
     public function GetEvents(Request $request, Response $response, $args) {

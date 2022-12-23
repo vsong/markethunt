@@ -58,4 +58,14 @@ class DateUtils
 
         return new DateTime($dateString, new DateTimeZone('UTC'));
     }
+
+    /**
+     * Given a UNIX timestamp in seconds, converts it to a DateTime object in the UTC timezone
+     * @param int $timestamp
+     * @return DateTime
+     */
+    public static function TimestampToUtcDateTime(int $timestamp): DateTime
+    {
+        return DateTime::createFromFormat('U', $timestamp, new DateTimeZone('UTC'));
+    }
 }

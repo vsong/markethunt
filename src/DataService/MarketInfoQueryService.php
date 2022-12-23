@@ -6,6 +6,7 @@ use App\DataTransferObject\ItemHeader;
 use App\Model\Event;
 use App\Model\ItemInfo;
 use App\Model\MarketDatapoint;
+use App\Model\StockDatapoint;
 use App\Util\DateUtils;
 use PDO;
 
@@ -95,6 +96,40 @@ class MarketInfoQueryService
     }
 
     /**
+     * @param int $itemId
+     * @return StockDatapoint[] Array of StockDatapoints sorted by date ascending, or empty if item is not found
+     * or has no stock history
+     */
+    public function getItemStockHistory(int $itemId): array {
+        /** @var StockDatapoint[] $result */
+        $result = [];
+
+        $statement = $this->db->prepare('
+        SELECT
+            unix_timestamp(`timestamp`) as `unix_timestamp`, `bid`, `ask`, `sell_listing_volume`
+        FROM
+            bid_ask
+        WHERE
+            item_id = :itemId
+        ORDER BY
+            `timestamp` ASC');
+        $statement->bindParam('itemId', $itemId);
+        $statement->execute();
+
+        foreach ($statement->fetchAll() as $row) {
+            $result[] = new StockDatapoint(
+                $itemId,
+                DateUtils::TimestampToUtcDateTime($row['unix_timestamp']),
+                $row['bid'],
+                $row['ask'],
+                $row['sell_listing_volume']
+            );
+        }
+
+        return $result;
+    }
+
+    /**
      * @return Event[] Array of Events sorted by start date ascending
      */
     public function getEvents(): array {
@@ -132,8 +167,6 @@ class MarketInfoQueryService
             DateUtils::IsoDateToUtcDateTime('2022-06-21'), DateUtils::IsoDateToUtcDateTime('2022-07-05'));
         $result[] = new Event("Hween '22",
             DateUtils::IsoDateToUtcDateTime('2022-10-12'), DateUtils::IsoDateToUtcDateTime('2022-11-02'));
-        $result[] = new Event("GWH '22",
-            DateUtils::IsoDateToUtcDateTime('2022-12-06'), DateUtils::IsoDateToUtcDateTime('2023-01-04'));
 
         return $result;
     }

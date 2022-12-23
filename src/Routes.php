@@ -5,6 +5,7 @@ namespace App;
 use App\Controller\FrontpageController;
 use App\Controller\MarketAnalyticsController;
 use App\Controller\MarketInfoController;
+use App\Middleware\ApiAuthMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
@@ -15,7 +16,9 @@ class Routes
 
         $app->group('', function (RouteCollectorProxy $group) {
             $group->get('/items', [MarketInfoController::class, 'GetAllItemHeaders']);
-            $group->get('/items/{itemId}', [MarketInfoController::class, 'GetItem']);
+            $group->get('/items/{itemId}', [MarketInfoController::class, 'GetItemMarketData']);
+            $group->get('/items/{itemId}/stock', [MarketInfoController::class, 'GetItemStockData'])
+                ->add(ApiAuthMiddleware::class);
             $group->get('/events', [MarketInfoController::class, 'GetEvents']);
 
             $group->group('/analytics', function (RouteCollectorProxy $group) {
