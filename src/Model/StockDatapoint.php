@@ -10,11 +10,11 @@ class StockDatapoint implements JsonSerializable
 {
     public int $itemId;
     public DateTime $timestamp;
-    public int $bid;
-    public int $ask;
+    public ?int $bid;
+    public ?int $ask;
     public int $supply;
 
-    public function __construct(int $itemId, DateTime $timestamp, int $bid, int $ask, $supply)
+    public function __construct(int $itemId, DateTime $timestamp, ?int $bid, ?int $ask, $supply)
     {
         $this->itemId = $itemId;
         $this->timestamp = $timestamp;
