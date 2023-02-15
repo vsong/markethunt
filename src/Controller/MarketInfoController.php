@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\DataService\MarketInfoQueryService;
+use App\DataTransferObject\ItemHeader;
 use App\DataTransferObject\ItemMarketHistory;
 use App\DataTransferObject\ItemStockHistory;
-use App\Util\CsvUtils;
+use App\Model\MarketDatapoint;
+use App\Model\StockDatapoint;
 use App\Util\DateUtils;
 use App\Util\ResponseUtils;
 use Psr\Container\ContainerInterface;
@@ -25,20 +27,20 @@ class MarketInfoController
 
         if ($request->getQueryParam('format') === 'csv') {
             return ResponseUtils::RespondCsv($response, $data, [
-                'item_id' => fn($itemHeader) => $itemHeader->itemInfo->itemId,
-                'name' => fn($itemHeader) => $itemHeader->itemInfo->name,
-                'latest_market_date' => function ($itemHeader) {
+                'item_id' => fn(ItemHeader $itemHeader) => $itemHeader->itemInfo->itemId,
+                'name' => fn(ItemHeader $itemHeader) => $itemHeader->itemInfo->name,
+                'latest_market_date' => function (ItemHeader $itemHeader) {
                     return $itemHeader->latestMarketDatapoint
                         ? DateUtils::DateTimeToUtcIsoDate($itemHeader->latestMarketDatapoint->date)
                         : null;
                 },
-                'latest_market_price' => function ($itemHeader) {
+                'latest_market_price' => function (ItemHeader $itemHeader) {
                     return $itemHeader->latestMarketDatapoint ? $itemHeader->latestMarketDatapoint->price : null;
                 },
-                'latest_market_sb_price' => function ($itemHeader) {
+                'latest_market_sb_price' => function (ItemHeader $itemHeader) {
                     return $itemHeader->latestMarketDatapoint ? $itemHeader->latestMarketDatapoint->sbPrice : null;
                 },
-                'latest_market_volume' => function ($itemHeader) {
+                'latest_market_volume' => function (ItemHeader $itemHeader) {
                     return $itemHeader->latestMarketDatapoint ? $itemHeader->latestMarketDatapoint->volume : null;
                 }
             ]);
@@ -64,10 +66,10 @@ class MarketInfoController
 
         if ($request->getQueryParam('format') === 'csv') {
             return ResponseUtils::RespondCsv($response, $marketData, [
-                'date' => fn ($datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->date),
-                'price' => fn ($datapoint) => $datapoint->price,
-                'sb_price' => fn ($datapoint) => $datapoint->sbPrice,
-                'volume' => fn ($datapoint) => $datapoint->volume,
+                'date' => fn (MarketDatapoint $datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->date),
+                'price' => fn (MarketDatapoint $datapoint) => $datapoint->price,
+                'sb_price' => fn (MarketDatapoint $datapoint) => $datapoint->sbPrice,
+                'volume' => fn (MarketDatapoint $datapoint) => $datapoint->volume,
             ]);
         }
 
@@ -91,10 +93,10 @@ class MarketInfoController
 
         if ($request->getQueryParam('format') === 'csv') {
             return ResponseUtils::RespondCsv($response, $stockData, [
-                'timestamp' => fn ($datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->timestamp),
-                'bid' => fn ($datapoint) => $datapoint->bid,
-                'ask' => fn ($datapoint) => $datapoint->ask,
-                'supply' => fn ($datapoint) => $datapoint->supply
+                'timestamp' => fn (StockDatapoint $datapoint) => $datapoint->timestamp->getTimestamp() * 1000,
+                'bid' => fn (StockDatapoint $datapoint) => $datapoint->bid,
+                'ask' => fn (StockDatapoint $datapoint) => $datapoint->ask,
+                'supply' => fn (StockDatapoint $datapoint) => $datapoint->supply
             ]);
         }
 
