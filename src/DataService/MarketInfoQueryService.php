@@ -177,6 +177,8 @@ class MarketInfoQueryService
             DateUtils::IsoDateToUtcDateTime('2023-02-28'), DateUtils::IsoDateToUtcDateTime('2023-03-21'));
         $result[] = new Event("SEH '23",
             DateUtils::IsoDateToUtcDateTime('2023-03-28'), DateUtils::IsoDateToUtcDateTime('2023-04-25'));
+        $result[] = new Event("Ronza '23",
+            DateUtils::IsoDateToUtcDateTime('2023-07-04'), DateUtils::IsoDateToUtcDateTime('2023-07-25'));
 
         return $result;
     }
