@@ -133,52 +133,25 @@ class MarketInfoQueryService
      * @return Event[] Array of Events sorted by start date ascending
      */
     public function getEvents(): array {
-        $result[] = new Event("Ronza '20",
-            DateUtils::IsoDateToUtcDateTime('2020-08-18'), DateUtils::IsoDateToUtcDateTime('2020-09-08'));
-        $result[] = new Event("Hween '20",
-            DateUtils::IsoDateToUtcDateTime('2020-10-14'), DateUtils::IsoDateToUtcDateTime('2020-11-03'));
-        $result[] = new Event("GWH '20",
-            DateUtils::IsoDateToUtcDateTime('2020-12-08'), DateUtils::IsoDateToUtcDateTime('2021-01-06'));
-        $result[] = new Event("LNY '21",
-            DateUtils::IsoDateToUtcDateTime('2021-02-09'), DateUtils::IsoDateToUtcDateTime('2021-02-23'));
-        $result[] = new Event("BDay '21",
-            DateUtils::IsoDateToUtcDateTime('2021-03-02'), DateUtils::IsoDateToUtcDateTime('2021-03-23'));
-        $result[] = new Event("SEH '21",
-            DateUtils::IsoDateToUtcDateTime('2021-03-30'), DateUtils::IsoDateToUtcDateTime('2021-04-27'));
-        $result[] = new Event("KGA '21",
-            DateUtils::IsoDateToUtcDateTime('2021-05-25'), DateUtils::IsoDateToUtcDateTime('2021-06-08'));
-        $result[] = new Event("Jaq '21",
-            DateUtils::IsoDateToUtcDateTime('2021-06-29'), DateUtils::IsoDateToUtcDateTime('2021-07-13'));
-        $result[] = new Event("Ronza '21",
-            DateUtils::IsoDateToUtcDateTime('2021-07-27'), DateUtils::IsoDateToUtcDateTime('2021-08-17'));
-        $result[] = new Event("Hween '21",
-            DateUtils::IsoDateToUtcDateTime('2021-10-13'), DateUtils::IsoDateToUtcDateTime('2021-11-02'));
-        $result[] = new Event("GWH '21",
-            DateUtils::IsoDateToUtcDateTime('2021-12-07'), DateUtils::IsoDateToUtcDateTime('2022-01-05'));
-        $result[] = new Event("LNY '22",
-            DateUtils::IsoDateToUtcDateTime('2022-01-31'), DateUtils::IsoDateToUtcDateTime('2022-02-15'));
-        $result[] = new Event("BDay '22",
-            DateUtils::IsoDateToUtcDateTime('2022-03-02'), DateUtils::IsoDateToUtcDateTime('2022-03-22'));
-        $result[] = new Event("SEH '22",
-            DateUtils::IsoDateToUtcDateTime('2022-03-29'), DateUtils::IsoDateToUtcDateTime('2022-04-26'));
-        $result[] = new Event("Ronza '22",
-            DateUtils::IsoDateToUtcDateTime('2022-05-25'), DateUtils::IsoDateToUtcDateTime('2022-06-15'));
-        $result[] = new Event("Jet '22",
-            DateUtils::IsoDateToUtcDateTime('2022-06-21'), DateUtils::IsoDateToUtcDateTime('2022-07-05'));
-        $result[] = new Event("Hween '22",
-            DateUtils::IsoDateToUtcDateTime('2022-10-12'), DateUtils::IsoDateToUtcDateTime('2022-11-02'));
-        $result[] = new Event("GWH '22",
-            DateUtils::IsoDateToUtcDateTime('2022-12-06'), DateUtils::IsoDateToUtcDateTime('2023-01-04'));
-        $result[] = new Event("LNY '23",
-            DateUtils::IsoDateToUtcDateTime('2023-01-17'), DateUtils::IsoDateToUtcDateTime('2023-01-31'));
-        $result[] = new Event("Jaq '23",
-            DateUtils::IsoDateToUtcDateTime('2023-02-07'), DateUtils::IsoDateToUtcDateTime('2023-02-22'));
-        $result[] = new Event("BDay '23",
-            DateUtils::IsoDateToUtcDateTime('2023-02-28'), DateUtils::IsoDateToUtcDateTime('2023-03-21'));
-        $result[] = new Event("SEH '23",
-            DateUtils::IsoDateToUtcDateTime('2023-03-28'), DateUtils::IsoDateToUtcDateTime('2023-04-25'));
-        $result[] = new Event("Ronza '23",
-            DateUtils::IsoDateToUtcDateTime('2023-07-04'), DateUtils::IsoDateToUtcDateTime('2023-07-25'));
+        /** @var Event[] $result */
+        $result = [];
+
+        $statement = $this->db->prepare('
+        SELECT
+           `short_name`, `start_date`, `end_date`
+        FROM
+            events
+        ORDER BY
+            `start_date` ASC');
+        $statement->execute();
+
+        foreach ($statement->fetchAll() as $row) {
+            $result[] = new Event(
+                $row['short_name'],
+                DateUtils::IsoDateToUtcDateTime($row['start_date']),
+                DateUtils::IsoDateToUtcDateTime($row['end_date'])
+            );
+        }
 
         return $result;
     }
