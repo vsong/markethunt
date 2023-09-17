@@ -6,16 +6,19 @@ class ItemInfo implements \JsonSerializable
 {
     public int $itemId;
     public string $name;
+    public bool $currentlyTradeable;
 
-    public function __construct(int $itemId, string $name) {
+    public function __construct(int $itemId, string $name, bool $currentlyTradeable) {
         $this->itemId = $itemId;
         $this->name = $name;
+        $this->currentlyTradeable = $currentlyTradeable;
     }
 
     public function jsonSerialize() {
         return [
             'item_id' => $this->itemId,
-            'name' => $this->name
+            'name' => $this->name,
+            'currently_tradeable' => $this->currentlyTradeable
         ];
     }
 }

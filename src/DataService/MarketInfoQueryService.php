@@ -35,7 +35,7 @@ class MarketInfoQueryService
                 $row['sb_price'],
                 $row['raw_volume_day']);
 
-            $itemInfo = new ItemInfo($row['item_id'], $row['name']);
+            $itemInfo = new ItemInfo($row['item_id'], $row['name'], $row['currently_tradeable']);
 
             $result[] = new ItemHeader($itemInfo, $itemMarketDatapoint);
         }
@@ -48,12 +48,18 @@ class MarketInfoQueryService
      * @return ItemInfo|null Returns ItemInfo if the item was found, or null if the item does not exist.
      */
     public function getItemInfo(int $itemId): ?ItemInfo {
-        $statement = $this->db->prepare('SELECT `item_id`, `name` FROM item_meta WHERE `item_id` = :itemId');
+        $statement = $this->db->prepare('
+        SELECT 
+            `item_id`, 
+            `name`, 
+            `currently_tradeable` 
+        FROM item_meta 
+        WHERE `item_id` = :itemId AND `historically_tradeable` = 1');
         $statement->bindParam('itemId', $itemId);
         $statement->execute();
         $row = $statement->fetch();
 
-        return ($row === false) ? null : new ItemInfo($row['item_id'], $row['name']);
+        return ($row === false) ? null : new ItemInfo($row['item_id'], $row['name'], $row['currently_tradeable']);
     }
 
     /**
