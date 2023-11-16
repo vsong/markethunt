@@ -2,13 +2,9 @@
 
 namespace App\DataService;
 
-use App\DataTransferObject\ItemHeader;
 use App\DataTransferObject\Otc\ListingCombination;
-use App\Model\Event;
 use App\Model\ItemInfo;
 use App\Model\Listing;
-use App\Model\MarketDatapoint;
-use App\Model\StockDatapoint;
 use App\Util\DateUtils;
 use PDO;
 
@@ -62,19 +58,14 @@ class OtcQueryService
         $result = [];
 
         $statement = $this->db->prepare('
-        SELECT l.*, UNIX_TIMESTAMP(m.created_on)  as timestamp
-        FROM listing l LEFT JOIN message m ON l.message_id = m.id 
-        WHERE l.item_id = :itemId AND l.listing_type = :listingType
-        ORDER BY m.created_on');
+        SELECT item_id, sb_price, listing_type, is_selling, amount, UNIX_TIMESTAMP(timestamp) as timestamp
+        FROM listing WHERE item_id = :itemId AND listing_type = :listingType ORDER BY timestamp');
 
         $statement->bindParam('itemId', $itemId);
         $statement->bindParam('listingType', $listingType);
         $statement->execute();
 
-
         foreach ($statement->fetchAll() as $row) {
-            print($row['created_on']);
-
             $result[] = new Listing(
                 $row['item_id'],
                 $row['sb_price'],
