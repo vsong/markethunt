@@ -2,14 +2,7 @@
 
 namespace App\Controller;
 
-use App\DataService\MarketInfoQueryService;
 use App\DataService\OtcQueryService;
-use App\DataTransferObject\ItemHeader;
-use App\DataTransferObject\ItemMarketHistory;
-use App\DataTransferObject\ItemStockHistory;
-use App\Model\MarketDatapoint;
-use App\Model\StockDatapoint;
-use App\Util\DateUtils;
 use App\Util\ResponseUtils;
 use Psr\Container\ContainerInterface;
 use Slim\Http\Response as Response;

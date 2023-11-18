@@ -2,25 +2,30 @@
 
 namespace App\DataTransferObject\Otc;
 
+use App\Model\ItemInfo;
+
 class ListingCombination implements \JsonSerializable
 {
-    public int $itemId;
+    public ItemInfo $item;
     public int $listingType;
+    public string $listingTypeDescription;
 
     /**
      * @param int $itemId
-     * @param int $listingType
+     * @param string $listingType
      */
-    public function __construct(int $itemId, int $listingType)
+    public function __construct(ItemInfo $item, int $listingType, string $listingTypeDescription)
     {
-        $this->itemId = $itemId;
+        $this->item = $item;
         $this->listingType = $listingType;
+        $this->listingTypeDescription = $listingTypeDescription;
     }
 
     public function jsonSerialize(): array {
         return [
-            'item_id' => $this->itemId,
-            'listing_type' => $this->listingType
+            'item' => $this->item,
+            'listing_type' => $this->listingType,
+            'listing_type_description' => $this->listingTypeDescription
         ];
     }
 }

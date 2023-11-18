@@ -50,29 +50,39 @@
 <section>
     <p class="api-link">https://{{api_hostname}}/items</p>
     <p>Get information about all items on the marketplace and their latest price and volume.</p>
-    <p><a href="/items">Example</a> | <a href="/items?format=csv">Example (CSV)</a></p>
-
+    <p><a href="/items">Example</a></p>
 </section>
 <section>
     <p class="api-link">https://{{api_hostname}}/items/<strong>{itemId}</strong></p>
     <p>Get information about an item and its marketplace history.</p>
-    <p><a href="/items/926">Example</a> | <a href="/items/926?format=csv">Example (CSV)</a></p>
+    <p><a href="/items/926">Example</a></p>
 </section>
 <section>
     <p class="api-link">https://{{api_hostname}}/items/<strong>{itemId}</strong>/stock</p>
     <p>Get detailed information about an item's historical buy and sell orders.</p>
-    <p><a href="/items/926/stock">Example</a> | <a href="/items/926/stock?format=csv">Example (CSV)</a></p>
+    <p><a href="/items/926/stock">Example</a></p>
 </section>
 <h2>Marketplace Analytics</h2>
 <section>
     <p class="api-link">https://{{api_hostname}}/analytics/total-volumes/<strong>{from}</strong>[/<strong>{to}</strong>]</p>
     <p>Get total trade volume of all active items between two dates. The <code>to</code> date is optional and defaults to today.</p>
-    <p><a href="/analytics/total-volumes/2022-09-01/2022-10-01">Example</a> | <a href="/analytics/total-volumes/2022-09-01/2022-10-01?format=csv">Example (CSV)</a></p>
+    <p><a href="/analytics/total-volumes/2022-09-01/2022-10-01">Example</a></p>
 </section>
 <section>
     <p class="api-link">https://{{api_hostname}}/analytics/movers/<strong>{from}</strong>[/<strong>{to}</strong>]</p>
     <p>Get price movement information of all active items between two dates. The <code>to</code> date is optional and defaults to today.</p>
-    <p><a href="/analytics/movers/2022-10-01/2022-10-14">Example</a> | <a href="/analytics/movers/2022-10-01/2022-10-14?format=csv">Example (CSV)</a></p>
+    <p><a href="/analytics/movers/2022-10-01/2022-10-14">Example</a></p>
+</section>
+<h2>Discord Over-the-Counter (OTC) Data</h2>
+<section>
+    <p class="api-link">https://{{api_hostname}}/otc/listings</p>
+    <p>Get list of all listing type and item combinations currently available in the database.</p>
+    <p><a href="/otc/listings">Example</a></p>
+</section>
+<section>
+    <p class="api-link">https://{{api_hostname}}/otc/listings/<strong>{typeId}</strong>/<strong>{itemId}</strong></p>
+    <p>Get listing data of type <code>typeId</code> for item <code>itemId</code>.</p>
+    <p><a href="/otc/listings/4/2858">Example</a></p>
 </section>
 <h2>Misc</h2>
 <section>

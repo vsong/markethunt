@@ -39,10 +39,18 @@ class OtcQueryService
         /** @var ListingCombination[] $result */
         $result = [];
 
-        $statement = $this->db->query('SELECT DISTINCT item_id, listing_type FROM listing ORDER BY item_id, listing_type');
+        $statement = $this->db->query('
+            SELECT im.name, im.currently_tradeable, l.item_id, l.listing_type, lt.description 
+            FROM item_meta im 
+            RIGHT JOIN (SELECT DISTINCT item_id, listing_type FROM listing) l ON l.item_id = im.item_id 
+            LEFT JOIN listing_type lt ON l.listing_type = lt.id
+            ORDER BY l.listing_type, l.item_id');
 
         foreach ($statement as $row) {
-            $result[] = new ListingCombination($row['item_id'], $row['listing_type']);
+            $result[] = new ListingCombination(
+                new ItemInfo($row['item_id'], $row['name'], $row['currently_tradeable']),
+                $row['listing_type'],
+                $row['description']);
         }
 
         return $result;
