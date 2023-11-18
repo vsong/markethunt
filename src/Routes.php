@@ -5,7 +5,7 @@ namespace App;
 use App\Controller\FrontpageController;
 use App\Controller\MarketAnalyticsController;
 use App\Controller\MarketInfoController;
-use App\Middleware\ApiAuthMiddleware;
+use App\Controller\OtcController;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
@@ -23,6 +23,11 @@ class Routes
             $group->group('/analytics', function (RouteCollectorProxy $group) {
                 $group->get('/total-volumes/{fromDate}[/{toDate}]', [MarketAnalyticsController::class, 'GetTotalVolumes']);
                 $group->get('/movers/{fromDate}[/{toDate}]', [MarketAnalyticsController::class, 'GetMarketMovement']);
+            });
+
+            $group->group('/otc', function (RouteCollectorProxy $group) {
+                $group->get('/listings', [OtcController::class, 'GetAllListingCombinations']);
+                $group->get('/listings/{listingType}/{itemId}', [OtcController::class, 'GetListings']);
             });
         })->add(Middleware::AllowAllCors());
     }
