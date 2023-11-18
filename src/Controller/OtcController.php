@@ -16,10 +16,6 @@ class OtcController
         $this->otcQueryService = $container->get('otcQueryService');
     }
 
-    public function GetAllItems(Request $request, Response $response, $args) {
-        return $response->withJson($this->otcQueryService->getAllItems());
-    }
-
     public function GetAllListingCombinations(Request $request, Response $response, $args) {
         return $response->withJson($this->otcQueryService->getAllListingCombinations());
     }

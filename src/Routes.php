@@ -26,7 +26,6 @@ class Routes
             });
 
             $group->group('/otc', function (RouteCollectorProxy $group) {
-                $group->get('/items', [OtcController::class, 'GetAllItems']);
                 $group->get('/listings', [OtcController::class, 'GetAllListingCombinations']);
                 $group->get('/listings/{listingType}/{itemId}', [OtcController::class, 'GetListings']);
             });

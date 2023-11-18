@@ -17,22 +17,6 @@ class OtcQueryService
     }
 
     /**
-     * @return ItemInfo[] Item Info ordered by Item ID ascending
-     */
-    public function getAllItems(): array {
-        /** @var ItemInfo[] $result */
-        $result = [];
-
-        $statement = $this->db->query('SELECT * FROM item_meta ORDER BY item_id');
-
-        foreach ($statement as $row) {
-            $result[] = new ItemInfo($row['item_id'], $row['name'], $row['currently_tradeable']);
-        }
-
-        return $result;
-    }
-
-    /**
      * @return ListingCombination[] Item Info ordered by Item ID ascending
      */
     public function getAllListingCombinations(): array {
