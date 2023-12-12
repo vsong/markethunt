@@ -6,7 +6,8 @@
         "slim/http": "^1.2",
         "php-di/php-di": "^6.4",
         "ext-pdo": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "predis/predis": "^2.2"
     },
     "autoload": {
         "psr-4": {
