@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\DataService\MarketAnalyticsQueryService;
-use App\DataTransferObject\ItemMovement;
 use App\DataTransferObject\ItemTotalVolume;
 use App\Util\DateUtils;
 use App\Util\ResponseUtils;
@@ -40,18 +39,6 @@ class MarketAnalyticsController
 
         $volumeData = $this->marketAnalyticsQueryService->getTotalVolumes($fromDate, $toDate);
 
-        if ($request->getQueryParam('format') === 'csv') {
-            return ResponseUtils::RespondCsv(
-                $response,
-                $volumeData,
-                [
-                    'item_id' => fn (ItemTotalVolume $datapoint) => $datapoint->itemId,
-                    'total_volume' => fn (ItemTotalVolume $datapoint) => $datapoint->volume,
-                    'total_gold_volume' => fn (ItemTotalVolume $datapoint) => $datapoint->goldVolume
-                ],
-                "total_volumes");
-        }
-
         return $response->withJson([
             'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),
             'to' => DateUtils::DateTimeToUtcIsoDate($toDate),
@@ -87,23 +74,6 @@ class MarketAnalyticsController
         }
 
         $movementData = $this->marketAnalyticsQueryService->getMarketMovement($fromDate, $toDate);
-
-        if ($request->getQueryParam('format') === 'csv') {
-            return ResponseUtils::RespondCsv(
-                $response,
-                $movementData,
-                [
-                    'item_id' => fn (ItemMovement $datapoint) => $datapoint->itemId,
-                    'start_price' => fn (ItemMovement $datapoint) => $datapoint->startPrice,
-                    'start_date' => fn (ItemMovement $datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->startDate),
-                    'end_price' => fn (ItemMovement $datapoint) => $datapoint->endPrice,
-                    'end_date' => fn (ItemMovement $datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->endDate),
-                    'percent_change' => fn (ItemMovement $datapoint) => $datapoint->getPercentChange(),
-                    'period_volume' => fn (ItemMovement $datapoint) => $datapoint->periodVolume,
-                    'period_gold_volume' => fn (ItemMovement $datapoint) => $datapoint->periodGoldVolume,
-                ],
-                "movers");
-        }
 
         return $response->withJson([
             'from' => DateUtils::DateTimeToUtcIsoDate($fromDate),

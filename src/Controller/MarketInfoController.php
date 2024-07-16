@@ -7,7 +7,6 @@ use App\DataTransferObject\ItemHeader;
 use App\DataTransferObject\ItemMarketHistory;
 use App\DataTransferObject\ItemStockHistory;
 use App\Model\MarketDatapoint;
-use App\Model\StockDatapoint;
 use App\Util\DateUtils;
 use App\Util\ResponseUtils;
 use Psr\Container\ContainerInterface;
@@ -23,87 +22,89 @@ class MarketInfoController
     }
 
     public function GetAllItemHeaders(Request $request, Response $response, $args) {
-        $data = $this->marketInfoQueryService->getAllItemHeaders();
+        return $response->withJson($this->marketInfoQueryService->getAllItemHeaders());
+    }
 
-        if ($request->getQueryParam('format') === 'csv') {
-            return ResponseUtils::RespondCsv($response, $data, [
-                'item_id' => fn(ItemHeader $itemHeader) => $itemHeader->itemInfo->itemId,
-                'name' => fn(ItemHeader $itemHeader) => $itemHeader->itemInfo->name,
-                'latest_market_date' => function (ItemHeader $itemHeader) {
-                    return $itemHeader->latestMarketDatapoint
-                        ? DateUtils::DateTimeToUtcIsoDate($itemHeader->latestMarketDatapoint->date)
-                        : null;
-                },
-                'latest_market_price' => function (ItemHeader $itemHeader) {
-                    return $itemHeader->latestMarketDatapoint ? $itemHeader->latestMarketDatapoint->price : null;
-                },
-                'latest_market_sb_price' => function (ItemHeader $itemHeader) {
-                    return $itemHeader->latestMarketDatapoint ? $itemHeader->latestMarketDatapoint->sbPrice : null;
-                },
-                'latest_market_volume' => function (ItemHeader $itemHeader) {
-                    return $itemHeader->latestMarketDatapoint ? $itemHeader->latestMarketDatapoint->volume : null;
-                }
-            ]);
+    public function SearchItems(Request $request, Response $response, $args) {
+        $query = trim($request->getQueryParam('query', ''));
+        if (strlen($query) === 0) {
+            return ResponseUtils::Respond400($response, 'Must provide a query');
         }
 
-        return $response->withJson($this->marketInfoQueryService->getAllItemHeaders());
+        $queryNormalized = $this->NormalizeSearchTerm($query);
+        $items = $this->marketInfoQueryService->getAllItemHeaders();
+        usort($items, function($a, $b) {
+            $aName = $a->itemInfo->name;
+            $bName = $b->itemInfo->name;
+
+            if ($aName == $bName) {
+                return 0;
+            }
+
+            return ($aName < $bName) ? -1 : 1;
+        });
+
+        $foundItems = array_values(array_filter($items, function($item) use ($queryNormalized) {
+            $itemNameNormalized = $this->NormalizeSearchTerm($item->itemInfo->name);
+            $itemAcronym = $this->GetAcronym($itemNameNormalized);
+
+            return strpos($itemNameNormalized, $queryNormalized) !== false || strpos($itemAcronym, $queryNormalized) !== false;
+        }));
+
+        return $response->withJson($foundItems);
     }
 
     public function GetItemMarketData(Request $request, Response $response, $args) {
         $itemId = filter_var($args['itemId'], FILTER_VALIDATE_INT);
-
         if ($itemId === false) {
             return ResponseUtils::Respond400($response, 'Item ID must be numeric');
         }
 
         $itemInfo = $this->marketInfoQueryService->getItemInfo($itemId);
-
         if ($itemInfo === null) {
             return ResponseUtils::Respond404($response, 'Item ID not found');
         }
 
         $marketData = $this->marketInfoQueryService->getItemMarketHistory($itemId);
-
-        if ($request->getQueryParam('format') === 'csv') {
-            return ResponseUtils::RespondCsv($response, $marketData, [
-                'date' => fn (MarketDatapoint $datapoint) => DateUtils::DateTimeToUtcIsoDate($datapoint->date),
-                'price' => fn (MarketDatapoint $datapoint) => $datapoint->price,
-                'sb_price' => fn (MarketDatapoint $datapoint) => $datapoint->sbPrice,
-                'volume' => fn (MarketDatapoint $datapoint) => $datapoint->volume,
-            ]);
-        }
-
         return $response->withJson(new ItemMarketHistory($itemInfo, $marketData));
     }
 
     public function GetItemStockData(Request $request, Response $response, $args) {
         $itemId = filter_var($args['itemId'], FILTER_VALIDATE_INT);
-
         if ($itemId === false) {
             return ResponseUtils::Respond400($response, 'Item ID must be numeric');
         }
 
         $itemInfo = $this->marketInfoQueryService->getItemInfo($itemId);
-
         if ($itemInfo === null) {
             return ResponseUtils::Respond404($response, 'Item ID not found');
         }
 
         $stockData = $this->marketInfoQueryService->getItemStockHistory($itemId);
-
-        if ($request->getQueryParam('format') === 'csv') {
-            return ResponseUtils::RespondCsv($response, $stockData, [
-                'timestamp' => fn (StockDatapoint $datapoint) => $datapoint->timestamp->getTimestamp() * 1000,
-                'bid' => fn (StockDatapoint $datapoint) => $datapoint->bid,
-                'ask' => fn (StockDatapoint $datapoint) => $datapoint->ask,
-                'supply' => fn (StockDatapoint $datapoint) => $datapoint->supply
-            ]);
-        }
-
         return $response->withJson(new ItemStockHistory($itemInfo, $stockData));
     }
 
     public function GetEvents(Request $request, Response $response, $args) {
         return $response->withJson($this->marketInfoQueryService->getEvents());
+    }
+
+    private function NormalizeSearchTerm(string $str): string {
+        $str = strtolower($str);
+        $str = str_replace(['.', ',', '|', '+'], '', $str);
+        $str = str_replace('-', ' ', $str);
+
+        return $str;
+    }
+
+    private function GetAcronym(string $str): string {
+        $acronym = '';
+
+        foreach (explode(' ', $str) as $word) {
+            if (strlen($word) > 0) {
+                $acronym .= $word[0];
+            }
+        }
+
+        return $acronym;
     }
 }
