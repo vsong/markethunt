@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Cache\CacheServiceFactory;
 use App\Database\DatabaseConnectionFactory;
 use App\DataService\ApiTokenQueryService;
 use App\DataService\MarketAnalyticsQueryService;
@@ -17,5 +18,6 @@ class Dependencies
         $container->set('marketAnalyticsQueryService', fn() => new MarketAnalyticsQueryService($container->get('db')));
         $container->set('otcQueryService', fn() => new OtcQueryService($container->get('db')));
         $container->set('apiTokenQueryService', fn() => new ApiTokenQueryService([$_ENV['RESTRICTED_ENDPOINTS_TOKEN']]));
+        $container->set('cacheService', fn() => CacheServiceFactory::CreateFromEnv());
     }
 }
