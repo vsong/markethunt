@@ -1,0 +1,8 @@
+services:
+  api:
+    build:
+      target: base
+    ports:
+      - 9001:80
+    volumes:
+      - ./:/app
