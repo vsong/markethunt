@@ -1,0 +1,51 @@
+name: Deploy to Prod
+
+on:
+  push:
+    branches: master
+
+env:
+  API_ENV: api/config/.env
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Prepare env files
+    - run: mv .env.release .env
+    - run: echo "DB_DSN=${{ secrets.DB_DSN }}" >> $API_ENV
+    - run: echo "DB_USER=${{ secrets.DB_USER }}" >> $API_ENV
+    - run: echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $API_ENV
+    - run: echo "API_HOSTNAME=api.markethunt.win" >> $API_ENV
+    - run: echo "MARKETHUNT_APP_HOSTNAME=markethunt.win" >> $API_ENV
+    - run: echo "USE_REDIS=false" >> $API_ENV
+    - run: echo "REDIS_HOST=localhost" >> $API_ENV
+    - run: echo "REDIS_PORT=6379" >> $API_ENV
+    - run: echo "REDIS_PREFIX=" >> $API_ENV
+
+    - name: Install SSH SSH key
+    - run: mkdir ~/.ssh
+    - run: echo "${{ secrets.SSHKEY }}" > ~/.ssh/id_rsa
+    - run: chmod 600 ~/.ssh/id_rsa
+
+    - name: Copy files to Prod
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSHKEY }}
+        source: "./*,!.git*"
+        target: ${{ secrets.PROD_PATH }}
+        rm: true
+
+    - name: Build Containers
+    - run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} <<'ENDSSH'
+        cd ${{ secrets.PROD_PATH }}
+        docker compose down
+        docker compose up --build -d
+        docker ps
+        ENDSSH

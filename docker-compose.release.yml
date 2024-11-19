@@ -1,0 +1,6 @@
+services:
+  api:
+    build:
+      target: release
+    ports:
+      - 9002:80
