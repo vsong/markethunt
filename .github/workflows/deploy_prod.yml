@@ -20,7 +20,7 @@ jobs:
     - run: echo "DB_USER=${{ secrets.DB_USER }}" >> $API_ENV
     - run: echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $API_ENV
     - run: echo "API_HOSTNAME=api.markethunt.win" >> $API_ENV
-    - run: echo "MARKETHUNT_APP_HOSTNAME=${{ markethunt.win }}" >> $API_ENV
+    - run: echo "MARKETHUNT_APP_HOSTNAME=markethunt.win" >> $API_ENV
     - run: echo "USE_REDIS=false" >> $API_ENV
     - run: echo "REDIS_HOST=localhost" >> $API_ENV
     - run: echo "REDIS_PORT=6379" >> $API_ENV
