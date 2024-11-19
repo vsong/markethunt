@@ -14,8 +14,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Prepare env files
+    - name: Prepare Docker .env
     - run: mv .env.release .env
+    - run: echo "APP_ENV=prod" >> .env
+
+    - name: Prepare API .env
     - run: echo "DB_DSN=${{ secrets.DB_DSN }}" >> $API_ENV
     - run: echo "DB_USER=${{ secrets.DB_USER }}" >> $API_ENV
     - run: echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $API_ENV
