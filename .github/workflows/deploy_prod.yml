@@ -27,7 +27,7 @@ jobs:
 
     - name: Prepare API .env
       run: |
-        echo "DB_DSN=${{ secrets.DB_DSN }}" >> $API_ENV
+        echo "DB_DSN=\"${{ secrets.DB_DSN }}\"" >> $API_ENV
         echo "DB_USER=${{ secrets.DB_USER }}" >> $API_ENV
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $API_ENV
         echo "API_HOSTNAME=api.markethunt.win" >> $API_ENV
