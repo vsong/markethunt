@@ -1,6 +1,6 @@
 FROM webdevops/php-nginx:8.2 AS base
 
-FROM base AS prod
+FROM base AS release
 COPY ./config /app/config
 COPY ./public /app/public
 COPY ./src /app/src
