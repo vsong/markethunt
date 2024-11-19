@@ -36,7 +36,6 @@ jobs:
         echo "REDIS_HOST=localhost" >> $API_ENV
         echo "REDIS_PORT=6379" >> $API_ENV
         echo "REDIS_PREFIX=" >> $API_ENV
-        cat $API_ENV
 
     - name: Install SSH SSH key
       run: |
