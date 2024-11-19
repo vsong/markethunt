@@ -48,7 +48,7 @@ jobs:
         rm: true
 
     - name: Build Containers
-    - run: |
+      run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} <<'ENDSSH'
         cd ${{ secrets.PROD_PATH }}
         docker compose down
