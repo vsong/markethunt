@@ -1,5 +1,7 @@
 services:
   api:
+    build:
+      context: ./api
     container_name: markethunt-api-${APP_ENV?}
     environment:
       - WEB_DOCUMENT_ROOT=/app/public

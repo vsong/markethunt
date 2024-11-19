@@ -5,4 +5,4 @@ services:
     ports:
       - 9001:80
     volumes:
-      - ./:/app
+      - ./api:/app
