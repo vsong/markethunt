@@ -2,5 +2,7 @@ services:
   api:
     build:
       target: release
+    extra_hosts:
+      - host.docker.internal:host-gateway
     ports:
-      - 9002:80
+      - 9011:80

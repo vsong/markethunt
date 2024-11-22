@@ -5,6 +5,5 @@ services:
     container_name: markethunt-api-${APP_ENV?}
     environment:
       - WEB_DOCUMENT_ROOT=/app/public
-    extra_hosts:
-      - host.docker.internal:host-gateway
     restart: on-failure
+    

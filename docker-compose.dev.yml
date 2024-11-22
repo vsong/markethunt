@@ -6,3 +6,7 @@ services:
       - 9001:80
     volumes:
       - ./api:/app
+  db:
+    build:
+      context: ./database
+    container_name: markethunt-db-${APP_ENV?}
