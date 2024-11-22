@@ -2,11 +2,31 @@ services:
   api:
     build:
       target: base
+    environment:
+      - WEB_DOCUMENT_ROOT=/app/public
     ports:
       - 9001:80
     volumes:
       - ./api:/app
+
   db:
     build:
       context: ./database
     container_name: markethunt-db-${APP_ENV?}
+
+  frontend:
+    build:
+      target: base
+    environment:
+      - WEB_DOCUMENT_ROOT=/app/public
+    ports:
+      - 9002:80
+    volumes:
+      - ./frontend:/app
+
+  node:
+    image: node:22
+    entrypoint: sleep infinity
+    container_name: markethunt-node-${APP_ENV?}
+    volumes:
+      - ./frontend:/app

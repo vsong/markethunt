@@ -1,0 +1,17 @@
+{% extends "base.twig" %}
+{% block meta_description %}Discord OTC prices{% endblock %}
+{% block title %}Discord OTC prices{% endblock %}
+
+{% block head %}
+{{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div style="width: 800px; margin: auto">
+        <p style="color: grey; text-align: center">
+            This feature is currently in beta. Please leave suggestions on the Mousehunt discord or on the <a href="https://github.com/vsong/markethunt-app/issues/new">Github</a>
+        </p>
+        <div id="otc-app"></div>
+    </div>
+    <script type="text/javascript" src="assets/js/build/otc_app.js"></script>
+{% endblock %}

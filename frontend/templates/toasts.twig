@@ -1,0 +1,21 @@
+<div id="toast-undelete" onclick="undelete()">
+    <span id="undelete-text">Undo delete</span>
+    <span style="font-size: 20px; margin-left: 5px; vertical-align: top;" class="material-icons">undo</span>
+</div>
+<script>
+var undeleteToastTimeout = null;
+function showUndeleteToast(storageKey) {
+    localStorage.undelete = localStorage[storageKey];
+    localStorage.undeleteKey = storageKey;
+    clearTimeout(undeleteToastTimeout);
+    $('#toast-undelete').addClass('show');
+    undeleteToastTimeout = setTimeout(function(){
+        $('#toast-undelete').removeClass('show');
+    }, 6000);
+}
+
+function undelete() {
+    localStorage[localStorage.undeleteKey] = localStorage.undelete;
+    location.reload();
+}
+</script>

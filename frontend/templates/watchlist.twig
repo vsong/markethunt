@@ -1,0 +1,427 @@
+{% extends "base.twig" %}
+{% block meta_description %}My watchlisted items{% endblock %}
+{% block title %}Watchlist{% endblock %}
+
+{% block head %}
+{{ parent() }}
+{% if constant('APPENV') == 'prod' %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.min.js"></script>
+{% else %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.js"></script>
+{% endif %}
+{% endblock %}
+
+{% block body %}
+<div class="pure-g">
+    <script>
+        var initialItemId = {{ current_item_id }};
+    </script>
+    <div class="pure-u-1 pure-u-xl-11-24">
+        {% include 'chart/chartContainer.twig' %}
+    </div>
+    <div id="watchlist-container" class="pure-u-1 pure-u-xl-13-24 xl-vue-table-container">
+        <div style="text-align: center">
+            <h1>Watchlist</h1>
+        </div>
+        {% verbatim %}
+        <div v-cloak id="vue-container" class="watchlist-tabs-container">
+            <ul>
+                <li v-for="(watchlist, widx) in appData.watchlists" class="watchlist-tab">
+                    <a v-bind:href="'#' + watchlist.uid" @click="setTabIndex(widx)">{{ watchlist.name }}</a>
+                    <div class="tab-control-container">
+                        <i class="ui-icon light-ui tablesorter-icon ui-icon-pencil" @click="editWatchlist(widx)"></i>
+                        <i class="ui-icon light-ui tablesorter-icon ui-icon-close" @click="removeWatchlist(widx)"></i>
+                    </div>
+                </li>
+                <li class="watchlist-tab"><a style="padding: 0px;" href="#newlist" @click="newWatchlist()"><span style="margin: 4px 1px;" class="material-icons">add</span></a></li>
+            </ul>
+            <div v-for="(watchlist, widx) in appData.watchlists" v-bind:id="watchlist.uid" class="watchlist-tab-content">
+                <template v-if="watchlist.uid === appData.watchlists[selectedWatchlistIdx].uid">
+                    <table class="pure-table pure-table-striped small-td-text table-sortable" style="width:100%; background-color: white;">
+                        <thead>
+                            <tr>
+                                <th class="sortable-header collapse-column-mobile" @click="sort('item')">
+                                    Item<i v-bind:class="getSortIconClass('item')"></i>
+                                </th>
+                                <th class="sortable-header collapse-column-mobile" @click="sort('comment')">
+                                    Comment<i v-bind:class="getSortIconClass('comment')"></i>
+                                </th>
+                                <th class="sortable-header right-align shrink-wrap" @click="sort('mark')">
+                                    Mark<i v-bind:class="getSortIconClass('mark')"></i>
+                                </th>
+                                <th class="sortable-header right-align shrink-wrap" @click="sort('price')">
+                                    Price<i v-bind:class="getSortIconClass('price')"></i>
+                                </th>
+                                <th class="sortable-header right-align shrink-wrap" @click="sort('chg')">
+                                    Chg%<i v-bind:class="getSortIconClass('chg')"></i>
+                                </th>
+                                <th style="background-color: rgb(216, 0, 0)" v-if="isDebugEnabled()">Debug</th>
+                                <th class="button-container"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, idx) in watchlistSorted">
+                                <td class="collapse-column-mobile" v-bind:class="{'sb-row-marker' : item.mark_type === 'sb'}">
+                                    <a @click="setChart(item.item_id, appData.itemData[item.item_id].name)">
+                                        {{ appData.itemData[item.item_id].name }}
+                                    </a>
+                                </td>
+                                <td class="collapse-column-mobile comment-column">{{ item.comment }}</td>
+                                <template v-if="item.mark !== null">
+                                    <td class="right-align shrink-wrap">{{ item.mark.toLocaleString(...getLocaleStringOpts(item.mark_type)) + getMarkTypeAppendText(item.mark_type) }}</td>
+                                    <td class="right-align  shrink-wrap" v-bind:class="getColorClass(getLatestPrice(item) / item.mark - 1)">
+                                        {{ getLatestPrice(item).toLocaleString(...getLocaleStringOpts(item.mark_type)) + getMarkTypeAppendText(item.mark_type) }}
+                                    </td>
+                                    <td class="right-align" v-bind:class="getColorClass(getLatestPrice(item) / item.mark - 1)">
+                                        {{ formatPercent((getLatestPrice(item) / item.mark - 1) * 100) }}
+                                    </td>
+                                </template>
+                                <template v-else>
+                                    <td class="right-align"></td>
+                                    <td class="right-align">{{ appData.itemData[item.item_id].latest_price.toLocaleString() }}</td>
+                                    <td class="right-align"></td>
+                                </template>
+                                <td v-if="isDebugEnabled()">{{ selectedWatchlistIdx }}</td>
+                                <td class="right-align button-container">
+                                    <span @click="editWatchItem(widx, idx)" class="material-icons">edit</span>
+                                    <span @click="removeWatchItem(widx, idx)" class="material-icons">delete</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div v-if="watchlist.watches.length === 0" class="empty-watchlist-message">This watchlist is empty.</div>
+                </template>
+            </div>
+            <div id="newlist" class="watchlist-tab-content"></div>
+            <div v-if="appData.watchlists.length === 0">
+                <p>You deleted all your watchlists! Click the <span style="font-size: 16px" class="material-icons">add</span> icon above to create a new watchlist. </p>
+                <img src="/assets/img/NotLikeDuck.png" />
+            </div>
+        </div>
+        {% endverbatim %}
+    </div>
+</div>
+<div id="new-watchlist-dialog" style="display:none">
+    <form id="new-watchlist-form" name="new-watchlist-form" class="pure-form pure-form-stacked">
+        <fieldset>
+            <label for="new-watchlist-name">Watchlist name <span class="required-indicator">*</span></label>
+            <input style="width: 100%" type="text" id="new-watchlist-name" required pattern=".+" />
+        </fieldset>
+    </form>
+</div>
+{% include('toasts.twig') %}
+<script>
+/* main script block */
+// initial jquery tabs update
+$( function() {
+    $("#vue-container").tabs({
+        beforeActivate: function(event, ui) {
+            if (ui.newPanel.attr('id') === 'newlist'){
+                event.preventDefault();
+            }
+        }
+    });
+});
+
+// set up new watchlist modal
+function newWatchlistModal(editWidx = null) {
+    var dialog = $("#new-watchlist-dialog").dialog({
+        dialogClass: 'themed-titlebar',
+        title: editWidx !== null ? 'Edit watchlist' : 'Add new watchlist',
+        draggable: false,
+        autoOpen: false,
+        // height: 280,
+        // width: 350,
+        modal: true,
+        buttons: [
+            {
+                text: editWidx !== null ? "Save changes" : "Create watchlist",
+                id: "new-watchlist-confirm",
+                click: function() {
+                    if (document.forms["new-watchlist-form"].reportValidity()) {
+                        var newWatchlistName = $('#new-watchlist-name').val();
+                        processNewWatchlistFormData(newWatchlistName, editWidx);
+                        dialog.dialog("close");
+                    }
+                },
+            },
+            {
+                text: "Cancel",
+                id: "new-watchlist-cancel",
+                click: function() {
+                    dialog.dialog("close");
+                },
+            },
+        ],
+        open: function(event, ui) {
+            // click outside to close
+            $('.ui-widget-overlay').bind('click', function() { 
+                dialog.dialog('close'); 
+            });
+
+            // override button classes
+            $('#new-watchlist-confirm').removeClass().addClass("pure-button pure-button-primary");
+            $('#new-watchlist-cancel').removeClass().addClass("pure-button");
+
+            // set up form and clear data from last use
+            if (editWidx !== null) {
+                $('#new-watchlist-name').val(appData.watchlists[editWidx].name);
+            } else {
+                $('#new-watchlist-name').val('');
+            }
+        }
+    });
+
+    dialog.dialog("open");
+}
+// chart handling
+renderChartWithItemId({{ current_item_id }}, "{{ current_item_name }}");
+
+function handleChartSubmit(itemId, itemName, addToHistory = true) {
+    renderChartWithItemId(itemId, itemName);
+    if (addToHistory === true) {
+        window.history.replaceState({}, itemName, "/watchlist.php?item_id=" + itemId);
+    }
+}
+
+function processNewWatchlistFormData(watchlistName, editWidx = null) {
+    if (editWidx !== null) {
+        appData.watchlists[editWidx].name = watchlistName;
+    } else {
+        appData.watchlists.push(newWatchlistObject(watchlistName));
+        appData.redrawTabs = true; // set to true *after* modifying watchlist
+    }
+
+    setWatchlistObj(appData.watchlists);
+}
+
+function processWatchlistFormData(itemId, mark, markType, comment, widx) {
+    addToWatchlist(widx, itemId, mark, markType, comment);
+}
+
+function processWatchlistEdit(mark, markType, comment, widx, idx, newWidx = null) {
+    const itemId = appData.watchlists[widx].watches[idx].item_id;
+    appData.watchlists[widx].watches.splice(idx, 1);
+    setWatchlistObj(appData.watchlists);
+    addToWatchlist(newWidx === null ? widx : newWidx, itemId, mark, markType, comment);
+}
+
+// Generic add to watchlist
+function addToWatchlist(widx, itemId, mark, markType, comment) {
+    appData.watchlists[widx].watches.push(newWatchlistItem(itemId, comment, markType, mark));
+    setWatchlistObj(appData.watchlists);
+}
+
+// reload when other tab edits watchlist
+window.addEventListener('storage', (e) => {
+    if (e.key == getWatchlistObjKey()) {
+        window.location.reload();
+    }
+});
+
+/* vue script block */
+const { reactive } = Vue;
+var watchlistRaw = getWatchlistObj();
+const appData = reactive({
+    itemData: {{ item_metadata | json_encode | raw }},
+    watchlists: watchlistRaw,
+    redrawTabs: false,
+});
+
+const app = Vue.createApp({
+    data() {
+        return {
+            appData,
+            currentSort: 'item',
+            currentSortDir: 'asc',
+            selectedWatchlistIdx: 0,
+            debugMode
+        }
+    },
+    computed: {
+        watchlistSorted() {
+            if (this.selectedWatchlistIdx >= this.appData.watchlists.length) {
+                this.selectedWatchlistIdx = appData.watchlists.length - 1;
+            }
+            return this.appData.watchlists[this.selectedWatchlistIdx].watches.sort((a,b) => {
+                var order = (this.currentSortDir === 'asc') ? 1 : -1;
+
+                // float SB mark type to the top when sorting mark or curr price columns
+                if ((this.currentSort === 'mark' || this.currentSort === 'price') && b.mark_type !== a.mark_type) {
+                    if (a.mark_type === 'sb') {
+                        return -1;
+                    } else if (b.mark_type === 'sb') {
+                        return 1;
+                    }
+                }
+
+                if (this.currentSort === 'item') {
+                    var a_val = appData.itemData[a.item_id].name;
+                    var b_val = appData.itemData[b.item_id].name;
+                } else if (this.currentSort === 'comment') {
+                    var a_val = a.comment === "" ? null : a.comment;
+                    var b_val = b.comment === "" ? null : b.comment;
+                } else if (this.currentSort === 'mark') {
+                    var a_val = a.mark;
+                    var b_val = b.mark;
+                } else if (this.currentSort === 'price') {
+                    var a_val = this.getLatestPrice(a);
+                    var b_val = this.getLatestPrice(b);
+                } else if (this.currentSort === 'chg') {
+                    var a_val = (a.mark == null) ? null : this.getLatestPrice(a) / a.mark - 1;
+                    var b_val = (b.mark == null) ? null : this.getLatestPrice(b) / b.mark - 1;
+                } else {
+                    throw new Error('Sort key not recognized: ' + this.currentSort);
+                }
+
+                if (a_val === b_val) {
+                    return 0;
+                } 
+                if (a_val === null) {
+                    return 1;
+                }
+                if (b_val === null) {
+                    return -1;
+                }
+
+                if (a_val > b_val) {
+                    return 1 * order;
+                } else if (a_val < b_val) {
+                    return -1 * order;
+                } else {
+                    return 0;
+                }
+            });
+        },
+    },
+    methods: {
+        sort(sortKey) {
+            if(sortKey === this.currentSort) {
+                this.currentSortDir = (this.currentSortDir === 'asc') ? 'desc' : 'asc';
+            } else {
+                this.currentSortDir = 'asc';
+                this.currentSort = sortKey;
+            }
+        },
+        getMarkTypeAppendText(markType) {
+            const appendTextLookup = {'gold': '', 'sb': ' SB'};
+
+            if (markType == null) {
+                return '';
+            }
+
+            return appendTextLookup[markType];
+        },
+        getLatestPrice(item) {
+            if (item.mark_type === 'sb') {
+                return appData.itemData[item.item_id].latest_sb_price;
+            } else {
+                return appData.itemData[item.item_id].latest_price;
+            }
+        },
+        getLocaleStringOpts(markType) {
+            const stringOpts = {
+                'gold': [],
+                'sb': [undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2}]
+            };
+
+            if (markType == null) {
+                return stringOpts.gold;
+            }
+
+            return stringOpts[markType];
+        },
+        formatPercent(num) {
+            if (num > 0) {
+                return '+' + num.toFixed(1) + '%';
+            } else if (num < 0) {
+                return num.toFixed(1) + '%';
+            } else {
+                return (0).toFixed(1) + '%';
+            }
+        },
+        getColorClass(num) {
+            if (num > 0) {
+                return {'gains-text' : true};
+            } else if (num < 0) {
+                return {'loss-text' : true};
+            } else {
+                return {};
+            }
+        },
+        getSortIconClass(columnKey) {
+            if (columnKey === this.currentSort){
+                if (this.currentSortDir === 'asc') {
+                    return ['ui-icon', 'light-ui', 'tablesorter-icon', 'ui-icon-caret-1-n'];
+                } else {
+                    return ['ui-icon', 'light-ui', 'tablesorter-icon', 'ui-icon-caret-1-s'];
+                }
+            } else {
+                return ['ui-icon', 'light-ui', 'tablesorter-icon', 'ui-icon-caret-2-n-s'];
+            }
+        },
+        removeWatchItem(widx, idx) {
+            var thisItemId =  appData.watchlists[widx].watches[idx].item_id;
+            appData.watchlists[widx].watches.splice(idx, 1);
+            setWatchlistObj(appData.watchlists);
+            if (thisItemId === Number(document.getElementById('chartSelector').value)) {
+                renderChartWithItemId(thisItemId, appData.itemData[thisItemId].name);
+            }
+        },
+        editWatchItem(widx, idx) {
+            var thisItemId =  appData.watchlists[widx].watches[idx].item_id;
+            addToWatchlistModal(
+                appData.watchlists[widx].watches[idx].mark,
+                appData.watchlists[widx].watches[idx].item_id,
+                true, 
+                appData.watchlists[widx].watches[idx].mark_type,
+                appData.watchlists[widx].watches[idx].comment,
+                widx,
+                idx
+            );
+        },
+        removeWatchlist(widx) {
+            showUndeleteToast(getWatchlistObjKey());
+            if (widx < this.selectedWatchlistIdx || this.selectedWatchlistIdx === appData.watchlists.length - 1) {
+                this.selectedWatchlistIdx--;
+                $("#vue-container").tabs("option", "active", this.selectedWatchlistIdx);
+            }
+            appData.watchlists.splice(widx, 1);
+            this.appData.redrawTabs = true;
+            setWatchlistObj(appData.watchlists);
+        },
+        editWatchlist(widx) {
+            newWatchlistModal(widx);
+        },
+        setChart(itemId, headerText) {
+            const event = new CustomEvent('setChart', {detail: itemId});
+            document.dispatchEvent(event);
+
+            window.history.replaceState({}, headerText, "/watchlist.php?item_id=" + itemId);
+        },
+        setTabIndex(widx) {
+            this.selectedWatchlistIdx = widx;
+            $('#watchlist-select').val(widx);
+        },
+        newWatchlist() {
+            newWatchlistModal();
+        },
+        isDebugEnabled() {
+            if (this.debugMode && localStorage.enableDebug === 'true') {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    },
+    updated() {
+        if (this.appData.redrawTabs) {
+            this.appData.redrawTabs = false;
+            $("#vue-container").tabs('refresh');
+        }
+    }
+});
+
+app.mount("#watchlist-container");
+</script>
+{% endblock %}

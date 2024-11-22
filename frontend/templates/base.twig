@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        {% block head %}
+            {# pretty much all viewports are >=360px, so initial-scale of 0.8 guarantees viewport >=450px #}
+            <meta name="viewport" content="width=device-width, initial-scale=0.8" />
+            <meta name="description" content="{% block meta_description %}{% endblock %}">
+
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/2.0.6/pure-min.css" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/2.0.6/grids-responsive.min.css" />
+            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" /> {# Also used for Quasar UMD #}
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+            <link rel="stylesheet" href="/assets/css/main.css" />
+
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lzutf8/0.6.0/lzutf8.min.js"></script>
+
+            <script type="text/javascript" src="/assets/js/utils.js"></script>
+            <script type="text/javascript" src="/assets/js/userData.js"></script>
+
+            <script type="text/javascript" src="assets/js/build/vendor.js"></script>
+
+            {% if constant('APPENV') == 'prod' %}
+                <script data-goatcounter="https://markethunt-goat.vsong.ca/count" async src="/assets/js/goat.js"></script>
+            {% endif %}
+
+            <script>
+                function redirectProd() {
+                    const currURL = window.location.href;
+                    window.location.href = window.location.href.replace('dev.', '');
+                }
+            </script>
+
+            <script>
+                var env = {
+                    'apiHost': '{{ api_host }}',
+                    'currentHost': '{{ current_host }}',
+                    'oldHost': '{{ old_host }}',
+                    'newHost': '{{ new_host }}'
+                }
+            </script>
+
+            <title>{% block title %}{% endblock %} - Markethunt</title>
+        {% endblock %}
+    </head>
+    <body class="markethunt-body">
+        {% if constant('APPENV') == 'prod' %}
+            <script>var debugMode = false;</script>
+        {% else %}
+            <script>var debugMode = true;</script>
+        {% endif %}
+        
+        <div id="main-toolbar" class="toolbar highlight">
+            <div class="toolbar-left">
+                <b><a href=index.php>Main page</a></b>
+                | <b><a href="/watchlist.php">Watchlist</a></b>
+                | <b><a href="/portfolio.php">Portfolio</a></b>
+                | <a href="/highestvolumes.php">Highest volume items</a>
+                | Top movers: <a href="/top.php?period=day">day</a>
+                <a href="/top.php?period=week">week</a>
+                <a href="/top.php?period=month">month</a>
+                <a href="/top.php?period=qtr">qtr</a>
+                <a href="/top.php?period=year">year</a>
+                | <a href="/otc.php">Discord prices [experimental]</a>
+                {% if constant('APPENV') == 'dev' %}
+                    <span id="dev-warning" style="background-color: rgb(218, 0, 0); padding: 0 3px">
+                        You are browsing the test site. Data loss can occur.
+                        <a href="#" onclick="redirectProd()">[Go to Production site]</a>
+                        <a href="#" onclick="document.getElementById('dev-warning').style.display = 'none'">[x]</a>
+                    </span>
+                {% endif %}
+            </div>
+            <div class="toolbar-right">
+                <div style="height: 5px">
+                    <a href="https://github.com/vsong/markethunt-app"><img src="/assets/img/GitHub-Mark-Light-32px.png" alt="GitHub"></a>
+                </div>
+            </div>
+        </div>
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>

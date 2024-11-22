@@ -1,0 +1,105 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/9.3.2/highstock.min.js"></script>
+<script>
+var itemData = {{ item_metadata | json_encode | raw }};
+var eventDates = {{ event_data | json_encode | raw }};
+</script>
+
+<div id="chartBundle" style="max-width:800px; width: 100%; margin:auto;">
+    <div id="chart-header-container">
+        <div id="chart-header-left" class="chart-header-column">
+            <h1 id="chartHeader" style="margin-bottom: 0px;">{% block chart_header %}{% endblock %}</h1>
+            <div style="margin: 10px 0px;">
+                <button id="add-to-watchlist" class="pure-button pure-button-primary" onclick="addToWatchlistModal(null)">
+                    Add to Watchlist
+                </button>
+                <button id="add-to-portfolio" class="pure-button pure-button-primary" onclick="addToPortfolioModal()">
+                    Add to Portfolio
+                </button>
+            </div>
+        </div>
+        <div id="chart-header-right" class="chart-header-column">
+            <div id="chart-header-price">--g</div>
+            <div id="chart-header-change">-- (-- %)</div>
+            <div id="chart-header-sb-index">-- SB</div>
+            <div style="margin: 3px 0px;">
+                <a id="chart-external-mh-link" href="#" target="_blank" rel="noopener noreferrer">
+                    Open in Mousehunt<span class="material-icons" style="font-size:12px; vertical-align:top; text-shadow: none;">launch</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="chart-extra-info">
+        <div class="extra-info-column">
+            <div class="extra-info-label-container">
+                Trade volume:<br>
+                Gold volume:
+            </div>
+            <div class="extra-info-value-container">
+                <span id="extra-info-volume-display">--</span><br>
+                <span id="extra-info-gold-volume-display">--</span>
+            </div>
+        </div>
+        <div class="extra-info-column">
+            <div class="extra-info-label-container">
+                7-day Trade volume:<br>
+                7-day Gold volume:
+            </div>
+            <div class="extra-info-value-container">
+                <span id="extra-info-7d-volume-display">--</span><br>
+                <span id="extra-info-7d-gold-volume-display">--</span>
+            </div>
+        </div>
+        <div style="flex-grow: 1"></div>
+        <div id="stock-data-checkbox-container" style="vertical-align: bottom;">
+            <br>
+            <label for="stock-data-checkbox">
+            <input
+                type="checkbox"
+                id="stock-data-checkbox"
+                onclick="BiHourlyChartCheckboxClicked(this.checked)"
+                autocomplete="off"
+            >
+                Bi-hourly data
+            </label>
+        </div>
+
+        <script>
+            function BiHourlyChartCheckboxClicked(checked) {
+                console.log('called1');
+                const selectedItem = document.getElementById('selected-item');
+                ToggleBiHourlyChart(checked, Number(selectedItem.dataset.itemId));
+            }
+
+            function ToggleBiHourlyChart(showBiHourly, itemId) {
+                if (showBiHourly) {
+                    renderBiHourlyStockChart(itemId);
+                }
+                else {
+                    renderChartWithItemId(itemId, itemData[itemId].name);
+                }
+            }
+        </script>
+    </div>
+    <div class="chart-loading-container">
+        <div id="chartContainer" style="width:100%; height:450px; margin:auto;"></div>
+        <div class="chart-loading">
+            <!-- <img class="chart-loading-loader" src="/assets/img/ball.svg"> -->
+        </div>
+    </div>
+    <div id="item-selector-app" style="margin: 5px 10px"></div>
+    <div class="credits">
+        <p>Get the <a href="https://greasyfork.org/en/scripts/441382-markethunt-plugin-for-mousehunt">Markethunt userscript</a>!</p>
+        <div>
+            <a href="https://ko-fi.com/vsong_program">
+                <img src="/assets/img/kofi.png" style="height: 30px;margin-top: 25px;" alt="Support me on Ko-fi">
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/chart.js"></script>
+
+{% include 'chart/watchlist_dialog.twig' %}
+{% include 'chart/portfolio_dialog.twig' %}
+
+<script type="text/javascript" src="assets/js/build/chart_autocomplete_app.js"></script>

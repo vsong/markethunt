@@ -1,1 +1,7 @@
+# php
 vendor/
+twig_cache/
+
+# node
+node_modules/
+/frontend/public/assets/js/build

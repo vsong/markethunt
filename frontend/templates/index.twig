@@ -1,0 +1,32 @@
+{% extends "base.twig" %}
+{% block meta_description %}Marketplace price history for {{ current_item_name }}{% endblock %}
+{% block title %}{{ current_item_name }}{% endblock %}
+
+{% block head %}
+{{ parent() }}
+{% endblock %}
+
+{% block chart_header %}{{ current_item_name }}{% endblock %}
+
+{% block body %}
+    <script>
+        var initialItemId = {{ current_item_id }};
+    </script>
+    <div>
+        {% include 'chart/chartContainer.twig' with {'include_credits': true} %}
+    </div>
+    <script>
+        renderChartWithItemId({{ current_item_id }}, "{{ current_item_name }}");
+
+        function handleChartSubmit(itemId, itemName, addToHistory = true) {
+            if (addToHistory === true) {
+                window.history.replaceState({}, itemName, "/index.php?item_id=" + itemId);
+                document.title = itemName + ' - Markethunt'; // change title after replaceState to preserve title of previous history entry
+            }
+            renderChartWithItemId(itemId, itemName);
+            if (window.goatcounter !== undefined) {
+                window.goatcounter.count();
+            }
+        }
+    </script>
+{% endblock %}

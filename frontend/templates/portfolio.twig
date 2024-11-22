@@ -1,0 +1,147 @@
+{% extends "base.twig" %}
+{% block meta_description %}My Portfolio{% endblock %}
+{% block title %}Portfolio{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    {% if constant('APPENV') == 'prod' %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.prod.min.js"></script>
+    {% else %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.29/vue.global.js"></script>
+    {% endif %}
+    <script type="text/javascript" src="assets/js/setupVue.js"></script>
+    <script type="text/javascript" src="assets/js/stores/portfolio.js"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="pure-g">
+        <script>
+            var initialItemId = {{ current_item_id }};
+        </script>
+        <div class="pure-u-1 pure-u-xl-11-24">
+            {% include 'chart/chartContainer.twig' %}
+        </div>
+        <div id="portfolio-container" class="pure-u-1 pure-u-xl-13-24 xl-vue-table-container">
+        </div>
+    </div>
+    <div id="new-portfolio-dialog" style="display:none">
+        <form id="new-portfolio-form" name="new-portfolio-form" class="pure-form pure-form-stacked">
+            <fieldset>
+                <label for="new-portfolio-name">Portfolio name <span class="required-indicator">*</span></label>
+                <input style="width: 100%" type="text" id="new-portfolio-name" required pattern=".+" />
+            </fieldset>
+        </form>
+    </div>
+    {% include('toasts.twig') %}
+    <script>
+        /* main script block */
+        // register new portfolio modal
+        function newPortfolioModal(editPidx = null) {
+            var dialog = $("#new-portfolio-dialog").dialog({
+                dialogClass: 'themed-titlebar',
+                title: editPidx !== null ? 'Edit portfolio' : 'Add new portfolio',
+                draggable: false,
+                autoOpen: false,
+                // height: 280,
+                // width: 350,
+                modal: true,
+                buttons: [
+                    {
+                        text: editPidx !== null ? "Save changes" : "Create portfolio",
+                        id: "new-portfolio-confirm",
+                        click: function() {
+                            if (document.forms["new-portfolio-form"].reportValidity()) {
+                                var newPortfolioName = $('#new-portfolio-name').val();
+                                processNewPortfolioFormData(newPortfolioName, editPidx);
+                                dialog.dialog("close");
+                            }
+                        },
+                    },
+                    {
+                        text: "Cancel",
+                        id: "new-portfolio-cancel",
+                        click: function() {
+                            dialog.dialog("close");
+                        },
+                    },
+                ],
+                open: function(event, ui) {
+                    // click outside to close
+                    $('.ui-widget-overlay').bind('click', function() {
+                        dialog.dialog('close');
+                    });
+
+                    // override button classes
+                    $('#new-portfolio-confirm').removeClass().addClass("pure-button pure-button-primary");
+                    $('#new-portfolio-cancel').removeClass().addClass("pure-button");
+
+                    // set up form and clear data from last use
+                    if (editPidx !== null) {
+                        $('#new-portfolio-name').val(appData.portfolios[editPidx].name);
+                    } else {
+                        $('#new-portfolio-name').val('');
+                    }
+                }
+            });
+
+            dialog.dialog("open");
+        }
+
+        function processNewPortfolioFormData(portfolioName, editPidx = null) {
+            if (editPidx !== null) {
+                appData.portfolios[editPidx].name = portfolioName;
+            } else {
+                appData.portfolios.push(newPortfolioObject(portfolioName));
+                appData.redrawTabs = true; // set to true *after* modifying portfolio
+            }
+
+            setPortfolioObj(appData.portfolios);
+        }
+
+        // chart handling
+        renderChartWithItemId({{ current_item_id }}, "{{ current_item_name }}");
+
+        function handleChartSubmit(itemId, itemName, addToHistory = true) {
+            renderChartWithItemId(itemId, itemName);
+            if (addToHistory === true) {
+                window.history.replaceState({}, itemName, "/portfolio.php?item_id=" + itemId);
+            }
+        }
+
+        function processNewPositionFormData(itemId, qty, mark, markType, pidx) {
+            addToPortfolio(pidx, itemId, mark, markType, qty)
+        }
+
+        function processPositionEdit(qty, mark, markType, pidx, idx, newPidx = null) {
+            const portfolio = appData.portfolios[pidx];
+            const position = portfolio.positions[idx];
+            editPosition(portfolio.uid, position.uid, qty, mark);
+
+            if (newPidx !== null && newPidx !== pidx) {
+                movePosition(portfolio.uid, position.uid, appData.portfolios[newPidx].uid);
+            }
+        }
+
+        // Generic add to portfolio
+        function addToPortfolio(pidx, itemId, mark, markType, qty) {
+            appData.portfolios[pidx].positions.push(newPortfolioPosition(itemId, qty, mark, markType));
+        }
+
+        // reload when other tab edits portfolio
+        window.addEventListener('storage', (e) => {
+            if (e.key === getPortfolioObjKey()) {
+                window.location.reload();
+            }
+        });
+
+        /* vue script block */
+        var portfoliosRaw = getPortfolioObj();
+
+        const appData = reactive({
+            itemData: itemData,
+            portfolios: reactivePortfolio,
+            redrawTabs: false,
+        });
+    </script>
+    <script type="text/javascript" src="assets/js/build/portfolio_app.js"></script>
+{% endblock %}

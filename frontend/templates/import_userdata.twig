@@ -1,0 +1,110 @@
+{% extends "base.twig" %}
+{% block title %}Import data from {{ old_host }}{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <style>
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div style="max-width: 1000px; margin: auto">
+        <h1>Import data from {{ old_host }}</h1>
+        <p>Click the button below to automatically import your portfolios and watchlists from the old Markethunt domain.</p>
+        <button class="pure-button pure-button-primary" onclick="openExportTab()">Start Auto Import</button>
+        <div id="auto-import-status-banner" class="status-banner" style="margin-top: 2em; display: none"></div>
+
+        <h2 style="margin-top: 2em;">Manual import</h2>
+        <p>If the import procedure doesn't work or gets stuck, do the following:</p>
+        <ol>
+            <li>Go to <a href="https://{{ old_host }}/manual_export.php" target="_blank" rel="noopener">{{ old_host }}/manual_export.php</a> and copy the text provided.</li>
+            <li>Paste the text into the box below and click Import.</li>
+        </ol>
+        <textarea id="manual-import-input" rows="5" style="width: 50%" placeholder="Paste text here"></textarea>
+        <p><button class="pure-button pure-button-primary" onclick="manualImport()">Import</button></p>
+        <div id="manual-import-status-banner" class="status-banner" style="margin-top: 2em; display: none"></div>
+    </div>
+
+    <script>
+        var oldHost = '{{ old_host }}';
+        var exportTab = null;
+        var autoImportStatusBanner = document.getElementById('auto-import-status-banner');
+        var manualImportStatusBanner = document.getElementById('manual-import-status-banner');
+
+        function importUserDataString(str) {
+            const importData = decodeUserDataString(str);
+
+            if (importData[getPortfolioObjKey()] == null || importData[getWatchlistObjKey()] == null) {
+                throw new Error('Missing import data key');
+            }
+
+            setPortfolioObj(importData[getPortfolioObjKey()]);
+            setWatchlistObj(importData[getWatchlistObjKey()]);
+
+            localStorage.lastImportFromOldHost = Date.now();
+        }
+
+        function openExportTab() {
+            if (localStorage.lastImportFromOldHost !== undefined
+                && !confirm('You already imported data from the old domain. Do you want to import again and overwrite existing data?')) {
+                return;
+            }
+
+            exportTab = window.open(`https://${oldHost}/auto_export.php`);
+            autoImportStatusBanner.style.display = 'block';
+            autoImportStatusBanner.innerHTML = '<p>Importing data ...</p><p>If you still see this message, try the manual import option below.</p>';
+            autoImportStatusBanner.className = 'status-banner status-banner-neutral';
+        }
+
+        function onReadyMsg(event) {
+            // document.querySelector('#receivedResponse').innerHTML = JSON.stringify(event.data);
+            exportTab.postMessage({message: 'exportUserDataCommand'}, `https://${oldHost}`);
+        }
+
+        function onImportUserDataCommand(event) {
+            try {
+                importUserDataString(event.data.data);
+            } catch (error) {
+                autoImportStatusBanner.innerHTML = '<p>Import failed. Data not in the correct format.</p><p>Try the manual import option below.</p>';
+                autoImportStatusBanner.className = 'status-banner status-banner-error';
+                return;
+            }
+
+            autoImportStatusBanner.innerHTML = `Imported ${getPortfolioObj().length} portfolios and ${getWatchlistObj().length} watchlists from ${oldHost}`;
+            autoImportStatusBanner.className = 'status-banner status-banner-success';
+        }
+
+        function manualImport() {
+            const data = document.getElementById('manual-import-input').value.trim();
+
+            try {
+                importUserDataString(data);
+            } catch (error) {
+                manualImportStatusBanner.style.display = 'block';
+                manualImportStatusBanner.innerHTML = `
+                    <p>Import failed. Data not in the correct format.</p>
+                    <p>Report this problem on the Mousehunt discord or on the
+                        <a href="https://github.com/vsong/markethunt-app/issues"> Markethunt Github</a>.
+                    </p>`;
+                manualImportStatusBanner.className = 'status-banner status-banner-error';
+                return;
+            }
+
+            manualImportStatusBanner.style.display = 'block';
+            manualImportStatusBanner.innerHTML = `Imported ${getPortfolioObj().length} portfolios and ${getWatchlistObj().length} watchlists.`;
+            manualImportStatusBanner.className = 'status-banner status-banner-success';
+        }
+
+        window.addEventListener('message', function(event) {
+            if (event.origin !== `https://${oldHost}`) {
+                return;
+            }
+
+            if (event.data.message === 'exportReadyMessage') {
+                onReadyMsg(event);
+            } else if (event.data.message === 'importUserDataCommand') {
+                onImportUserDataCommand(event);
+            }
+        });
+    </script>
+{% endblock %}

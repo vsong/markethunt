@@ -6,6 +6,7 @@ on:
 
 env:
   API_ENV: api/config/.env
+  WEB_CONFIG: frontend/config/config.php
 
 jobs:
   deploy:
@@ -38,6 +39,17 @@ jobs:
         echo "REDIS_PORT=6379" >> $API_ENV
         echo "REDIS_PREFIX=" >> $API_ENV
 
+    - name: Prepare Frontend config.php
+      run: |
+        rm $WEB_CONFIG
+        echo "<?php" >> $WEB_CONFIG
+        echo "$DB_USER = '${{ secrets.DB_USER }}';" >> $WEB_CONFIG
+        echo "$DB_PASSWORD = '${{ secrets.DB_PASSWORD }}';" >> $WEB_CONFIG
+        echo "$DB_HOST = '${{ secrets.DB_HOST }}';" >> $WEB_CONFIG
+        echo "$DB_DATABASE = 'markethunt';" >> $WEB_CONFIG
+        echo "$CURRENT_HOST = 'markethunt.win';" >> $WEB_CONFIG
+        echo "$API_HOST = 'api.markethunt.win';" >> $WEB_CONFIG
+
     - name: Install SSH SSH key
       run: |
         mkdir ~/.ssh
@@ -60,5 +72,4 @@ jobs:
         cd ${{ secrets.PROD_PATH }}
         docker compose down
         docker compose up --build -d
-        docker ps
         ENDSSH

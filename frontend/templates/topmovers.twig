@@ -1,0 +1,92 @@
+{% extends "base.twig" %}
+{% block meta_description %}Top winners and losers {{ date_range.from }} to {{ date_range.to }}{% endblock %}
+{% block title %}Top movers{% endblock %}
+
+{% block head %}
+{{ parent() }}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<script>
+    $(function() {
+        var dateFormat = "yy-mm-dd";
+        var dateOptions = { 
+            minDate: new Date(2020, 8-1, 20), 
+            maxDate: 0, 
+            dateFormat: dateFormat,
+            changeMonth: true,
+            changeYear: true,
+            showOtherMonths: true,
+            selectOtherMonths: true
+        };
+
+        $("#from").datepicker(dateOptions);
+    });
+</script>
+<h1 style="text-align: center">Top winners and losers {{ date_range.from }} to {{ date_range.to }}</h1>
+<div class="param-form-container">
+    <form id="paramForm" action="top.php" method="GET" class="pure-form param-form">
+        <div>
+            <label for="from">From:</label>
+            <input type="text" id="from" name="from" value={{ from }}>
+        </div>
+        <div>
+            <label for="volume_limit">Minimum gold volume:</label>
+            <input type="number" id="volume_limit" name="volume_limit" min=0 max=1000000000 value={{ volume_limit }}>
+        </div>
+        <input type="submit" class="pure-button pure-button-primary">
+    </form>
+</div>
+<div style="text-align: center">
+    <p><i>*Only showing items with a daily gold volume of at least {{ volume_limit|number_format}}.<br>
+    Daily gold volume and daily trade volume (Liquidity index) are measured from the past 14 days. </i></p>
+</div>
+<div class="pure-g" style="margin:auto; max-width:1400px">
+    {% for dataset in [winner_dataset, loser_dataset] %}
+        <div class="pure-u-1 pure-u-lg-1-2">
+            <div style="padding:10px">
+                <table style="margin:auto;" class="pure-table pure-table-striped table-sortable" id="table-id-{{ loop.index0 }}">
+                    <thead>
+                        <th class="right-align shrink-wrap">Chg%</th>
+                        <th>Item</th>
+                        <th class="right-align shrink-wrap-wordwrap">Current Price</th>
+                        <th class="right-align shrink-wrap-wordwrap">Daily Gold Volume</th>
+                        <th class="right-align shrink-wrap-wordwrap hide-mobile">Liquidity Index</th>
+                    </thead>
+                    <tbody>
+                        {% for row in dataset %}
+                            <tr {{ (row.change_pct|abs < 10) ? 'class="hide-mobile"' }}>
+                                {% if row.change_pct >= 0 %}
+                                    <td class="right-align gains-text">+{{ row.change_pct|number_format }}%</td>
+                                {% else %}
+                                    <td class="right-align loss-text">{{ row.change_pct|number_format }}%</td>
+                                {% endif %}
+                                <td><a href="/index.php?item_id={{ row.item_id }}">{{ row.name }}</a></td>
+                                <td class="right-align">{{ row.price|number_format }}</td>
+                                <td class="right-align">{{ row.avg_gold_volume|number_format }}</td>
+                                <td class="right-align hide-mobile">{{ row.avg_trade_volume|number_format(2) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {# sort winner table Desc (0, 1) and sort loser table Asc (0, 0) #}
+        <script>
+            $(function () {
+                $("#table-id-{{ loop.index0 }}").tablesorter({
+                    headerTemplate: '{content}{icon}',
+                    cssIcon: 'ui-icon light-ui',
+                    cssIconNone: 'ui-icon-caret-2-n-s',
+                    cssIconAsc: 'ui-icon-caret-1-n',
+                    cssIconDesc: 'ui-icon-caret-1-s',
+                    cssIconDisabled: 'ui-icon-blank',
+                    //sortInitialOrder: 'desc', // not intuitive and causes confusion - do not enable
+                    sortList: [[0, 1 - {{ loop.index0 }}]]
+                });
+            });
+        </script>
+    {% endfor %}
+</div>
+{% endblock %}

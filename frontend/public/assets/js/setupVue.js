@@ -1,0 +1,1 @@
+const { reactive, ref, watch } = Vue;

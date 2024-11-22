@@ -1,0 +1,85 @@
+{% extends "base.twig" %}
+{% block meta_description %}{{ header_title }}{% endblock %}
+{% block title %}Highest volume items{% endblock %}
+
+{% block head %}
+{{ parent() }}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<script>
+    $(function() {
+        var dateFormat = "yy-mm-dd";
+        var dateOptions = { 
+            minDate: new Date(2021, 12-1, 01), 
+            maxDate: 0, 
+            dateFormat: dateFormat,
+            changeMonth: true,
+            changeYear: true,
+            showOtherMonths: true,
+            selectOtherMonths: true
+        };
+
+        var from = $("#from").datepicker(dateOptions)
+            .on("change", function() {to.datepicker( "option", "minDate", getDate(this));
+        });
+
+        var to = $("#to").datepicker(dateOptions)
+            .on("change", function() {from.datepicker( "option", "maxDate", getDate(this));
+        });
+
+        function getDate(element) {
+            try {
+                return $.datepicker.parseDate(dateFormat, element.value);
+            } catch (error) {
+                return null;
+            }
+        }
+    });
+</script>
+<h1 style="text-align: center">{{ header_title }}</h1>
+<div class="param-form-container">
+    <form id="paramForm" action="highestvolumes.php" method="GET" class="pure-form param-form">
+        <div>
+            <label for="from">From:</label>
+            <input type="text" id="from" name="from" value={{ from }}>
+        </div>
+        <div>
+            <label for="to">To:</label>
+            <input type="text" id="to" name="to" value={{ to }}>
+        </div>
+        <input type="submit" class="pure-button pure-button-primary">
+    </form>
+</div>
+<table style="margin: 10px auto; " class="pure-table pure-table-striped table-sortable">
+    <thead>
+        <th class="right-align shrink-wrap">Gold volume</th>
+        <th class="right-align shrink-wrap">Trade volume</th>
+        <th>Item</th>
+    </thead>
+    <tbody>
+        {% for item in items %}
+            <tr>
+                <td class="right-align">{{ item.cum_goldvol|number_format }}</td>
+                <td class="right-align">{{ item.cum_tradevol|number_format }}</td>
+                <td><a href="/index.php?item_id={{ item.item_id }}">{{ item.name }}</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    $(function () {
+        $(".table-sortable").tablesorter({
+            headerTemplate: '{content}{icon}',
+            cssIcon: 'ui-icon light-ui',
+            cssIconNone: 'ui-icon-caret-2-n-s',
+            cssIconAsc: 'ui-icon-caret-1-n',
+            cssIconDesc: 'ui-icon-caret-1-s',
+            cssIconDisabled: 'ui-icon-blank',
+            //sortInitialOrder: 'desc', // not intuitive and causes confusion - do not enable
+            sortList: [[0,1]] // initial sort by first column desc
+        });
+    });
+</script>
+{% endblock %}

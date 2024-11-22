@@ -3,7 +3,9 @@ services:
     build:
       context: ./api
     container_name: markethunt-api-${APP_ENV?}
-    environment:
-      - WEB_DOCUMENT_ROOT=/app/public
     restart: on-failure
-    
+  frontend:
+    build:
+      context: ./frontend
+    container_name: markethunt-frontend-${APP_ENV?}
+    restart: on-failure

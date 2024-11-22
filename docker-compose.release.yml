@@ -6,3 +6,11 @@ services:
       - host.docker.internal:host-gateway
     ports:
       - 9011:80
+
+  frontend:
+    build:
+      target: release
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - 9012:80

@@ -1,0 +1,235 @@
+
+<div id="add-portfolio-dialog" style="display:none">
+    <div id="portfolio-action-message" style="font-weight: bold;"></div>
+    <form id="add-portfolio-form" name="add-portfolio-form" class="pure-form pure-form-stacked" onsubmit="return false">
+        <fieldset>
+            <label for="position-qty">Quantity bought</label>
+            <input type="number" id="position-qty" min=1 max=9999999999 required>
+
+            <div id="gold-mark-input-container">
+                <label for="position-mark">Buy price (ea)</label>
+                <input type="number" id="position-mark" min=1 max=9999999999 required>
+            </div>
+
+            <div id="sb-mark-input-container">
+                <label for="position-mark-sb">Buy price (ea)</label>
+                <input type="number" id="position-mark-sb" min=0.001 max=999999 step="0.001" required>
+            </div>
+
+            <label for="radio-gold-position-mark" class="pure-radio marktype-radio">
+                <input type="radio" id="radio-gold-position-mark" name="position-mark-type" value="gold" />Gold
+            </label>
+            <label for="radio-sb-position-mark" class="pure-radio marktype-radio">
+                <input type="radio" id="radio-sb-position-mark" name="position-mark-type" value="sb" />SB
+            </label>
+
+            <label for="portfolio-select">Portfolio</label>
+            <select type="text" id="portfolio-select" required></select>
+
+            <div style="display: none;" id="new-portfolio-name-input-container">
+                <label for="new-portfolio-name-addportfolio">New portfolio name <span class="required-indicator">*</span></label>
+                <input type="text" id="new-portfolio-name-addportfolio" pattern=".+" />
+            </div>
+            <input type="submit" onclick="document.getElementById('add-to-portfolio-confirm').click()" style="display: none">
+        </fieldset>
+    </form>
+    <p style="margin: 16px 0px 0px 0px;"><i>You can view your portfolio in the <a href="/portfolio.php">Portfolio</a> page.</i></p>
+</div>
+
+<script>
+// fill portfolio selector
+getPortfolioObj().forEach(function(portfolio, pidx) {
+    $('#portfolio-select').append(`<option value="${pidx}">${portfolio.name}</option>`);
+});
+
+// register portfolio selector listener
+$('#portfolio-select').change(function() {
+    if ($(this).val() === "newPortfolioOption") {
+        $('#new-portfolio-name-addportfolio').prop('required', true);
+        $('#new-portfolio-name-input-container').css("display", "block");
+    } else {
+        $('#new-portfolio-name-addportfolio').prop('required', false);
+        $('#new-portfolio-name-input-container').css("display", "none");
+    }
+});
+
+function togglePositionMarkInputBoxes() {
+    // TODO: verify that changing input type works in Safari. If not, try using native JS. Works in Chrome and FF.
+    if ($("input[name=position-mark-type]:checked").val() === "gold") {
+        $("#gold-mark-input-container").show();
+        $("#position-mark").prop("type", "number");
+        $("#position-mark").prop("required", true);
+
+        $("#sb-mark-input-container").hide();
+        $("#position-mark-sb").prop("type", "text");
+        $("#position-mark-sb").prop("required", false);
+    } else {
+        $("#gold-mark-input-container").hide();
+        $("#position-mark").prop("type", "text");
+        $("#position-mark").prop("required", false);
+
+        $("#sb-mark-input-container").show();
+        $("#position-mark-sb").prop("type", "number");
+        $("#position-mark-sb").prop("required", true);
+    }
+}
+
+// register mark type selector listener
+$("input[name=position-mark-type]").change(togglePositionMarkInputBoxes);
+
+function addToPortfolioModal(itemId = null, editPositionObj = null, editPidx = null, editIdx = null) {
+    itemId = itemId == null ? Number(document.getElementById('selected-item').dataset.itemId) : Number(itemId);
+
+    var savedPortfolios = getPortfolioObj();
+
+    var dialog = $("#add-portfolio-dialog").dialog({
+        dialogClass: 'themed-titlebar',
+        title: editPositionObj ? 'Edit portfolio entry' : `Add ${itemData[itemId].name} to portfolio`,
+        autoOpen: false,
+        modal: true,
+        buttons: [
+            {
+                text: editPositionObj ? "Save changes" : "Add to portfolio",
+                id: "add-to-portfolio-confirm",
+                click: function() {
+                    if (document.forms["add-portfolio-form"].reportValidity()) {
+                        var inputQty = Number($('#position-qty').val());
+                        var inputPriceType = $("input[name=position-mark-type]:checked").val();
+                        if (inputPriceType === "gold") {
+                            var inputPrice = Number($('#position-mark').val());
+                        } else {
+                            var inputPrice = Number($('#position-mark-sb').val());
+                        }
+
+                        // get the portfolio index that the new entry or edited entry will be inserted to
+                        if ($('#portfolio-select').val() === "newPortfolioOption") {
+                            var newPidx = savedPortfolios.length;
+                            processNewPortfolioFormData($('#new-portfolio-name-addportfolio').val());
+                        } else {
+                            var newPidx = Number($('#portfolio-select').val());
+                        }
+
+                        if (editPositionObj) {
+                            processPositionEdit(inputQty, inputPrice, inputPriceType, editPidx, editIdx, newPidx);
+                        } else {
+                            processNewPositionFormData(itemId, inputQty, inputPrice, inputPriceType, newPidx);
+                        }
+
+                        dialog.dialog("close");
+                    }
+                },
+            },
+            {
+                text: "Cancel",
+                id: "add-to-portfolio-cancel",
+                click: function() {
+                    dialog.dialog("close");
+                },
+            },
+        ],
+        open: function(event, ui) {
+            // click outside to close
+            $('.ui-widget-overlay').bind('click', function() { 
+                dialog.dialog('close'); 
+            });
+
+            // override button classes
+            $('#add-to-portfolio-confirm').removeClass().addClass("pure-button pure-button-primary");
+            $('#add-to-portfolio-cancel').removeClass().addClass("pure-button");
+
+            // set up action message
+            $('#portfolio-action-message').html('');
+            if (searchParams.get('action_msg')) {
+                $('#portfolio-action-message').html(searchParams.get('action_msg'));
+            }
+
+            // set up qty and buy price
+            var initialQty = 1;
+            var initialGoldMark = itemData[itemId].latest_price;
+            var initialSbMark = itemData[itemId].latest_sb_price;
+            var initialRadioCheckedId = "radio-gold-position-mark";
+            var initialRadiosDisabled = false;
+
+            if (editPositionObj !== null) {
+                initialQty = editPositionObj.qty;
+                if (editPositionObj.mark_type === "gold") {
+                    initialGoldMark = editPositionObj.mark;
+                } else {
+                    initialSbMark = editPositionObj.mark;
+                    initialRadioCheckedId = "radio-sb-position-mark";
+                }
+                initialRadiosDisabled = true;
+            } else if (searchParams.get('add_qty') !== null) {
+                initialQty = Number(searchParams.get('add_qty'));
+                if (searchParams.get('add_mark_type') === "sb") { // match sb first for legacy reasons
+                    initialSbMark = Number(searchParams.get('add_mark'));
+                    initialRadioCheckedId = "radio-sb-position-mark";
+                } else {
+                    initialGoldMark = Number(searchParams.get('add_mark'));
+                }
+            }
+            $('#position-qty').val(initialQty);
+            $('#position-mark').val(initialGoldMark);
+            $('#position-mark-sb').val(initialSbMark.toFixed(2));
+            $("#" + initialRadioCheckedId).prop("checked", true);
+            $('input[name=position-mark-type]').prop('disabled', initialRadiosDisabled);
+
+            togglePositionMarkInputBoxes();
+
+            $('#new-portfolio-name-addportfolio').val('');
+
+            // show new portfolio inputs for edge case when user has no portfolio
+            if (savedPortfolios.length === 0) {
+                $('#new-portfolio-name-addportfolio').prop('required', true);
+                $('#new-portfolio-name-input-container').css("display", "block");
+            } else {
+                $('#new-portfolio-name-addportfolio').prop('required', false);
+                $('#new-portfolio-name-input-container').css("display", "none");
+            }
+
+            // preserve portfolio selector value from last time
+            var oldPidxVal = Number($('#portfolio-select').val());
+            if (oldPidxVal >= savedPortfolios.length) {
+                oldPidxVal = 0;
+            } else if (isNaN(oldPidxVal)) { // user made a new watchlist last time, so select it this time
+                oldPidxVal = getWatchlistObj().length - 1;
+            }
+
+            // set up portfolio selector
+            $('#portfolio-select').empty();
+            savedPortfolios.forEach(function(portfolio, pidx) {
+                $('#portfolio-select').append(`<option value="${pidx}">${portfolio.name}</option>`);
+            });
+            $('#portfolio-select').append('<option value="newPortfolioOption">New portfolio ...</option>');
+            if (editPositionObj !== null) {
+                $('#portfolio-select').val(editPidx);
+            } else {
+                $('#portfolio-select').val(oldPidxVal);
+            }
+        }
+    });
+
+    dialog.dialog("open");
+}
+
+// Default implementations of watchlist form data handlers
+function processNewPortfolioFormData(portfolioName) {
+    var portfolios = getPortfolioObj();
+    portfolios.push(newPortfolioObject(portfolioName));
+    setPortfolioObj(portfolios);
+}
+
+function processNewPositionFormData(itemId, qty, mark, markType, pidx) {
+    var selector = document.getElementById('selected-item');
+
+    var portfolios = getPortfolioObj();
+    portfolios[pidx].positions.push(newPortfolioPosition(itemId, qty, mark, markType));
+    setPortfolioObj(portfolios);
+}
+
+// process 'action' query param, if any
+var searchParams = new URLSearchParams(window.location.search);
+if (searchParams.get('action') === 'add_position') {
+    addToPortfolioModal(searchParams.get('item_id'));
+}
+</script>
