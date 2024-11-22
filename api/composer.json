@@ -1,13 +1,13 @@
 {
     "require": {
-        "vlucas/phpdotenv": "^5.4",
-        "slim/slim": "^4.10",
-        "slim/psr7": "^1.5",
-        "slim/http": "^1.2",
+        "vlucas/phpdotenv": "^5.6",
+        "slim/slim": "^4.14",
+        "slim/psr7": "^1.7",
+        "slim/http": "^1.4",
         "php-di/php-di": "^6.4",
         "ext-pdo": "*",
         "ext-json": "*",
-        "predis/predis": "^2.2"
+        "predis/predis": "^2.3"
     },
     "autoload": {
         "psr-4": {
