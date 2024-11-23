@@ -70,6 +70,5 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} <<'ENDSSH'
         cd ${{ secrets.PROD_PATH }}
-        docker compose down
         docker compose up --build -d
         ENDSSH
