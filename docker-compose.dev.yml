@@ -13,6 +13,7 @@ services:
     build:
       context: ./database
     container_name: markethunt-db-${APP_ENV?}
+    restart: always
 
   frontend:
     build:
@@ -28,5 +29,6 @@ services:
     image: node:22
     entrypoint: sleep infinity
     container_name: markethunt-node-${APP_ENV?}
+    restart: always
     volumes:
       - ./frontend:/app

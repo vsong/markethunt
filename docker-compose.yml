@@ -3,9 +3,9 @@ services:
     build:
       context: ./api
     container_name: markethunt-api-${APP_ENV?}
-    restart: on-failure
+    restart: always
   frontend:
     build:
       context: ./frontend
     container_name: markethunt-frontend-${APP_ENV?}
-    restart: on-failure
+    restart: always
