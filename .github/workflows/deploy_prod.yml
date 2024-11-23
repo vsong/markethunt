@@ -43,12 +43,12 @@ jobs:
       run: |
         rm $WEB_CONFIG
         echo "<?php" >> $WEB_CONFIG
-        echo "$DB_USER = '${{ secrets.DB_USER }}';" >> $WEB_CONFIG
-        echo "$DB_PASSWORD = '${{ secrets.DB_PASSWORD }}';" >> $WEB_CONFIG
-        echo "$DB_HOST = '${{ secrets.DB_HOST }}';" >> $WEB_CONFIG
-        echo "$DB_DATABASE = 'markethunt';" >> $WEB_CONFIG
-        echo "$CURRENT_HOST = 'markethunt.win';" >> $WEB_CONFIG
-        echo "$API_HOST = 'api.markethunt.win';" >> $WEB_CONFIG
+        echo "\$DB_USER = '${{ secrets.DB_USER }}';" >> $WEB_CONFIG
+        echo "\$DB_PASSWORD = '${{ secrets.DB_PASSWORD }}';" >> $WEB_CONFIG
+        echo "\$DB_HOST = '${{ secrets.DB_HOST }}';" >> $WEB_CONFIG
+        echo "\$DB_DATABASE = 'markethunt';" >> $WEB_CONFIG
+        echo "\$CURRENT_HOST = 'markethunt.win';" >> $WEB_CONFIG
+        echo "\$API_HOST = 'api.markethunt.win';" >> $WEB_CONFIG
 
     - name: Install SSH SSH key
       run: |
