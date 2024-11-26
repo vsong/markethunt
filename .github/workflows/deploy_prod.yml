@@ -5,8 +5,8 @@ on:
     branches: master
 
 env:
-  API_ENV: api/config/.env
-  WEB_CONFIG: frontend/config/config.php
+  API_ENV: .env
+  WEB_CONFIG: config.php
 
 jobs:
   deploy:
@@ -27,6 +27,7 @@ jobs:
         echo "APP_ENV=prod" >> .env
 
     - name: Prepare API .env
+      working-directory: api/config
       run: |
         rm $API_ENV
         echo "DB_DSN=\"${{ secrets.DB_DSN }}\"" >> $API_ENV
@@ -40,6 +41,7 @@ jobs:
         echo "REDIS_PREFIX=" >> $API_ENV
 
     - name: Prepare Frontend config.php
+      working-directory: frontend/config
       run: |
         rm $WEB_CONFIG
         echo "<?php" >> $WEB_CONFIG
@@ -49,6 +51,12 @@ jobs:
         echo "\$DB_DATABASE = 'markethunt';" >> $WEB_CONFIG
         echo "\$CURRENT_HOST = 'markethunt.win';" >> $WEB_CONFIG
         echo "\$API_HOST = 'api.markethunt.win';" >> $WEB_CONFIG
+
+    - name: Build js
+      working-directory: frontend/www-src
+      run: |
+        npm install
+        npm run build-prod
 
     - name: Install SSH SSH key
       run: |
