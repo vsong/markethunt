@@ -70,7 +70,7 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSHKEY }}
-        source: "./*,!.git*,!frontend/www-src"
+        source: "./*,!.git*,!www-src/"
         target: ${{ secrets.PROD_PATH }}
         rm: true
 
