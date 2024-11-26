@@ -70,7 +70,8 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSHKEY }}
-        source: "./*,!.git*,!www-src/*"
+        # exclusions must use full paths
+        source: "./*,!.git*,!frontend/www-src"
         target: ${{ secrets.PROD_PATH }}
         rm: true
 
