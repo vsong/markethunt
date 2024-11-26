@@ -465,7 +465,7 @@ function renderChartWithItemId(itemId, chartHeaderText) {
         }
     }
 
-    $.getJSON(`https://${env.apiHost}/items/${itemId}`, function (response) {
+    $.getJSON(`/api/items/${itemId}`, function (response) {
         var selector = document.getElementById('selected-item');
         var selectedItemId = selector.dataset.itemId;
 
@@ -756,7 +756,7 @@ function renderBiHourlyStockChart(itemId) {
         loadingElem.style.display = "none";
     }
 
-    $.getJSON(`https://${env.apiHost}/items/${itemId}/stock?token=${localStorage.apiToken}`, (response) => {
+    $.getJSON(`/api/items/${itemId}/stock?token=${localStorage.apiToken}`, (response) => {
         var selector = document.getElementById('selected-item');
         var selectedItemId = selector.dataset.itemId;
 

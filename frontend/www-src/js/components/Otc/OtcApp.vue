@@ -265,10 +265,10 @@ export default {
     },
     methods: {
         async fetchData() {
-            const listingCombinationsFetch = fetch(`https://${env.apiHost}/otc/listings`)
+            const listingCombinationsFetch = fetch(`/api/otc/listings`)
                 .then(res => res.json());
 
-            const eventsFetch = fetch(`https://${env.apiHost}/events`)
+            const eventsFetch = fetch(`/api/events`)
                 .then(res => res.json());
 
             Promise.all([listingCombinationsFetch, eventsFetch]).then(values => {
@@ -295,7 +295,7 @@ export default {
             }
         },
         async handleSelection(listingCombination) {
-            const res = await fetch(`https://${env.apiHost}/otc/listings/${listingCombination.listing_type}/${listingCombination.item.item_id}`);
+            const res = await fetch(`/api/otc/listings/${listingCombination.listing_type}/${listingCombination.item.item_id}`);
             this.chartData = await res.json();
         }
     },
