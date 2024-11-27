@@ -262,6 +262,7 @@ function renderChartWithItemId(itemId, chartHeaderText) {
                                 + ` <b>${this.y.toLocaleString()}g</b><br/>`;
                         },
                     },
+                    zIndex: 1,
                 }, {
                     name: 'Volume',
                     type: 'column',
