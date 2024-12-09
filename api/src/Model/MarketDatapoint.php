@@ -22,7 +22,7 @@ class MarketDatapoint implements JsonSerializable
         $this->volume = $volume;
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
             'date' => DateUtils::DateTimeToUtcIsoDate($this->date),
             'price' => $this->price,

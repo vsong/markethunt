@@ -35,8 +35,8 @@ jobs:
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $API_ENV
         echo "API_HOSTNAME=api.markethunt.win" >> $API_ENV
         echo "MARKETHUNT_APP_HOSTNAME=markethunt.win" >> $API_ENV
-        echo "USE_REDIS=false" >> $API_ENV
-        echo "REDIS_HOST=localhost" >> $API_ENV
+        echo "USE_REDIS=true" >> $API_ENV
+        echo "REDIS_HOST=redis" >> $API_ENV
         echo "REDIS_PORT=6379" >> $API_ENV
         echo "REDIS_PREFIX=" >> $API_ENV
 
@@ -49,8 +49,6 @@ jobs:
         echo "\$DB_PASSWORD = '${{ secrets.DB_PASSWORD }}';" >> $WEB_CONFIG
         echo "\$DB_HOST = '${{ secrets.DB_HOST }}';" >> $WEB_CONFIG
         echo "\$DB_DATABASE = 'markethunt';" >> $WEB_CONFIG
-        echo "\$CURRENT_HOST = 'markethunt.win';" >> $WEB_CONFIG
-        echo "\$API_HOST = 'api.markethunt.win';" >> $WEB_CONFIG
 
     - name: Build js
       working-directory: frontend/www-src

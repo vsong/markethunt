@@ -2,12 +2,10 @@
 
 namespace App\Controller;
 
+use App\Cache\ICacheService;
 use App\DataService\MarketInfoQueryService;
-use App\DataTransferObject\ItemHeader;
 use App\DataTransferObject\ItemMarketHistory;
 use App\DataTransferObject\ItemStockHistory;
-use App\Model\MarketDatapoint;
-use App\Util\DateUtils;
 use App\Util\ResponseUtils;
 use Psr\Container\ContainerInterface;
 use Slim\Http\ServerRequest as Request;
@@ -16,9 +14,11 @@ use Slim\Http\Response as Response;
 class MarketInfoController
 {
     private MarketInfoQueryService $marketInfoQueryService;
+    private ICacheService $cacheService;
 
     public function __construct(ContainerInterface $container) {
         $this->marketInfoQueryService = $container->get('marketInfoQueryService');
+        $this->cacheService = $container->get('cacheService');
     }
 
     public function GetAllItemHeaders(Request $request, Response $response, $args) {
@@ -65,6 +65,10 @@ class MarketInfoController
             return ResponseUtils::Respond404($response, 'Item ID not found');
         }
 
+        if ($request->getQueryParam("plugin_ver") != null) {
+            $this->cacheService->registerItemView($itemId);
+        }
+
         $marketData = $this->marketInfoQueryService->getItemMarketHistory($itemId);
         return $response->withJson(new ItemMarketHistory($itemInfo, $marketData));
     }
@@ -80,12 +84,33 @@ class MarketInfoController
             return ResponseUtils::Respond404($response, 'Item ID not found');
         }
 
+        if ($request->getQueryParam("plugin_ver") != null) {
+            $this->cacheService->registerItemView($itemId);
+        }
+
         $stockData = $this->marketInfoQueryService->getItemStockHistory($itemId);
         return $response->withJson(new ItemStockHistory($itemInfo, $stockData));
     }
 
     public function GetEvents(Request $request, Response $response, $args) {
         return $response->withJson($this->marketInfoQueryService->getEvents());
+    }
+
+    public function GetTrendingItems(Request $request, Response $response, $args) {
+        $trendingIds = $this->cacheService->getTopViewedItemIds();
+        $headers = $this->marketInfoQueryService->getAllItemHeaders();
+
+        $lookup = [];
+        foreach ($headers as $header) {
+            $lookup[$header->itemInfo->itemId] = $header;
+        }
+
+        $trendingItemHeaders = [];
+        foreach ($trendingIds as $itemId) {
+            $trendingItemHeaders[] = $lookup[$itemId];
+        }
+
+        return $response->withJson($trendingItemHeaders);
     }
 
     private function NormalizeSearchTerm(string $str): string {

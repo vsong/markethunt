@@ -14,7 +14,7 @@ class ItemInfo implements \JsonSerializable
         $this->currentlyTradeable = $currentlyTradeable;
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
             'item_id' => $this->itemId,
             'name' => $this->name,

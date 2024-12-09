@@ -20,6 +20,7 @@ class Routes
             $group->get('/items/{itemId}', [MarketInfoController::class, 'GetItemMarketData']);
             $group->get('/items/{itemId}/stock', [MarketInfoController::class, 'GetItemStockData']);
             $group->get('/events', [MarketInfoController::class, 'GetEvents']);
+            $group->get('/trending', [MarketInfoController::class, 'GetTrendingItems']);
 
             $group->group('/analytics', function (RouteCollectorProxy $group) {
                 $group->get('/total-volumes/{fromDate}[/{toDate}]', [MarketAnalyticsController::class, 'GetTotalVolumes']);

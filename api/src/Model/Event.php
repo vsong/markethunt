@@ -19,7 +19,7 @@ class Event implements JsonSerializable
         $this->endDate = $endDate;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return [
             'short_name' => $this->shortName,

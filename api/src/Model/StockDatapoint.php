@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use App\Util\DateUtils;
 use DateTime;
 use JsonSerializable;
 
@@ -23,7 +22,7 @@ class StockDatapoint implements JsonSerializable
         $this->supply = $supply;
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
             'timestamp' => $this->timestamp->getTimestamp() * 1000,
             'bid' => $this->bid,

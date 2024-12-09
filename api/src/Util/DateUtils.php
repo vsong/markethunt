@@ -25,11 +25,18 @@ class DateUtils
         return true;
     }
 
-    public static function CurrentUtcDateTime(): DateTime {
+    public static function CurrentUnixEpochMillis(): int
+    {
+        return (int) (microtime(true) * 1000);
+    }
+
+    public static function CurrentUtcDateTime(): DateTime 
+    {
         return new DateTime('now', new DateTimeZone('UTC'));
     }
 
-    public static function CurrentUtcIsoDate(): string {
+    public static function CurrentUtcIsoDate(): string 
+    {
         return self::DateTimeToUtcIsoDate(new DateTime('now', new DateTimeZone('UTC')));
     }
 

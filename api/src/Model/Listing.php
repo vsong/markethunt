@@ -32,7 +32,7 @@ class Listing implements \JsonSerializable
         $this->timestamp = $timestamp;
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
             'item_id' => $this->itemId,
             'sb_price' => $this->sbPrice,

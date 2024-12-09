@@ -4,8 +4,14 @@ services:
       context: ./api
     container_name: markethunt-api-${APP_ENV?}
     restart: always
+
   frontend:
     build:
       context: ./frontend
     container_name: markethunt-frontend-${APP_ENV?}
+    restart: always
+  
+  redis:
+    image: redis/redis-stack-server:7.4.0-v1
+    container_name: markethunt-redis-${APP_ENV?}
     restart: always

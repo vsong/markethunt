@@ -17,4 +17,15 @@ interface ICacheService
      * @return void
      */
     public function set(string $key, string $value, int $timeoutSeconds = 60);
+
+    /**
+     * @param int $item_id
+     * @return void
+     */
+    public function registerItemView(int $item_id): void;
+
+    /**
+     * @return int[]
+     */
+    public function getTopViewedItemIds(): array;
 }
