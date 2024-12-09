@@ -84,10 +84,6 @@ class MarketInfoController
             return ResponseUtils::Respond404($response, 'Item ID not found');
         }
 
-        if ($request->getQueryParam("plugin_ver") != null) {
-            $this->cacheService->registerItemView($itemId);
-        }
-
         $stockData = $this->marketInfoQueryService->getItemStockHistory($itemId);
         return $response->withJson(new ItemStockHistory($itemInfo, $stockData));
     }
