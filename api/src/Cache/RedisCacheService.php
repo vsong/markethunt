@@ -49,8 +49,13 @@ class RedisCacheService implements ICacheService
 
     private function expireViews(int $timestamp): void 
     {
-        // get expired views
-        $expired_keys = $this->client->zrangebyscore(RedisCacheService::TOP_ITEMS_QUEUE_KEY, 0, $timestamp);
+        // pop expired views
+        $txnResponses = $this->client->transaction()
+            ->zrangebyscore(RedisCacheService::TOP_ITEMS_QUEUE_KEY, 0, $timestamp)
+            ->zremrangebyscore(RedisCacheService::TOP_ITEMS_QUEUE_KEY, 0, $timestamp)
+            ->execute();
+
+        $expired_keys = $txnResponses[0];
         if (count($expired_keys) == 0) {
             return;
         }
@@ -76,8 +81,7 @@ class RedisCacheService implements ICacheService
 
         $pipe->execute();
 
-        // remove expired views
-        $this->client->zremrangebyscore(RedisCacheService::TOP_ITEMS_QUEUE_KEY, 0, $timestamp);
+        // remove empty counts
         $this->client->zremrangebyscore(RedisCacheService::TOP_ITEMS_COUNTS_KEY, "-inf", 0);
     }
 }
