@@ -14,6 +14,17 @@
     </script>
     <div>
         {% include 'chart/chartContainer.twig' with {'include_credits': true} %}
+
+        {% include 'trending.twig' %}
+        
+        <div class="credits" style="max-width:800px; width: 100%; margin:auto;">
+            <p>Get the <a href="https://greasyfork.org/en/scripts/441382-markethunt-plugin-for-mousehunt">Markethunt userscript</a>!</p>
+            <div>
+                <a href="https://ko-fi.com/vsong_program">
+                    <img src="/assets/img/kofi.png" style="height: 30px;margin-top: 25px;" alt="Support me on Ko-fi">
+                </a>
+            </div>
+        </div>
     </div>
     <script>
         renderChartWithItemId({{ current_item_id }}, "{{ current_item_name }}");

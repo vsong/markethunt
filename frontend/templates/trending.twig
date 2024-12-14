@@ -1,0 +1,73 @@
+<div id="trending-container" style="max-width:500px; width: 100%; margin:auto; margin-top:20px;">
+    <div class="trending-heading"><b>Trending items</b></div>
+    <div id="trending-table">
+        <div class="trending-col" id="trending-col-1">
+            <div class="trending-row">1. </div>
+            <div class="trending-row">2. </div>
+            <div class="trending-row">3. </div>
+            <div class="trending-row">4. </div>
+            <div class="trending-row">5. </div>
+        </div>
+        <div class="trending-col" id="trending-col-2">
+            <div class="trending-row">6. </div>
+            <div class="trending-row">7. </div>
+            <div class="trending-row">8. </div>
+            <div class="trending-row">9. </div>
+            <div class="trending-row">10. </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.trending-heading {
+    text-align:center;
+}
+
+#trending-table {
+    display: flex;
+}
+
+.trending-col {
+    flex: 50%;
+}
+
+.trending-row {
+	min-height: 2em;
+	display: flex;
+	align-items: center;
+}
+
+.trending-row-anchor {
+	display: flex;
+	align-items: center;
+}
+
+.trending-row-anchor img {
+    margin: 0px 5px 0 2px;
+    max-height: 1.4em;
+    max-width: 1.4em;
+}
+
+@media (max-width: 600px) {
+    #trending-table {
+        display: block;
+    }
+
+    .trending-heading {
+        text-align:left;
+    }
+}
+</style>
+
+<script>
+$.getJSON(`/api/trending`, function (response) {
+    let selector = document.querySelectorAll('#trending-table .trending-row');
+    let list = [...selector];
+
+    for (let i = 0; i < response.length; i++) {
+        list[i].innerHTML = `${i+1}. <a href="/index.php?item_id=${response[i].item_info.item_id}" class="trending-row-anchor">
+            <img src="https://cdn.markethunt.win/thumbnail/item/${response[i].item_info.item_id}.gif"></img> ${response[i].item_info.name}
+        </a>`;
+    }
+});
+</script>
