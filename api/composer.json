@@ -7,7 +7,8 @@
         "php-di/php-di": "^6.4",
         "ext-pdo": "*",
         "ext-json": "*",
-        "predis/predis": "^2.3"
+        "predis/predis": "^2.3",
+        "sentry/sentry": "^4.11"
     },
     "autoload": {
         "psr-4": {
