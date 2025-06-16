@@ -8,6 +8,7 @@ use App\Model\ItemInfo;
 use App\Model\MarketDatapoint;
 use App\Model\StockDatapoint;
 use App\Util\DateUtils;
+use DateTime;
 use PDO;
 
 class MarketInfoQueryService
@@ -103,10 +104,12 @@ class MarketInfoQueryService
 
     /**
      * @param int $itemId
+     * @param DateTime $fromDate Date is Inclusive
+     * @param DateTime $toDate Date is Exclusive
      * @return StockDatapoint[] Array of StockDatapoints sorted by date ascending, or empty if item is not found
      * or has no stock history
      */
-    public function getItemStockHistory(int $itemId): array {
+    public function getItemStockHistory(int $itemId, DateTime $fromDate, DateTime $toDate): array {
         /** @var StockDatapoint[] $result */
         $result = [];
 
@@ -117,15 +120,55 @@ class MarketInfoQueryService
             bid_ask
         WHERE
             item_id = :itemId
+            AND `timestamp` BETWEEN :fromDate AND :toDate
         ORDER BY
             `timestamp` ASC');
         $statement->bindParam('itemId', $itemId);
+        $statement->bindValue('fromDate', DateUtils::DateTimeToUtcIsoDate($fromDate));
+        $statement->bindValue('toDate', DateUtils::DateTimeToUtcIsoDate($toDate));
         $statement->execute();
 
         foreach ($statement->fetchAll() as $row) {
             $result[] = new StockDatapoint(
                 $itemId,
                 DateUtils::TimestampToUtcDateTime($row['unix_timestamp']),
+                $row['bid'],
+                $row['ask'],
+                $row['sell_listing_volume']
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param int $itemId
+     * @param DateTime $toDate Date is Exclusive
+     * @return StockDatapoint[] Array of StockDatapoints sorted by date ascending, or empty if item is not found
+     * or has no stock history
+     */
+    public function getDailyItemStockHistory(int $itemId, DateTime $toDate): array {
+        /** @var StockDatapoint[] $result */
+        $result = [];
+
+        $statement = $this->db->prepare('
+        SELECT
+            `date`, `bid`, `ask`, `sell_listing_volume`
+        FROM
+            bid_ask_daily_avg
+        WHERE
+            item_id = :itemId
+            AND `date` < :toDate
+        ORDER BY
+            `date` ASC');
+        $statement->bindParam('itemId', $itemId);
+        $statement->bindValue('toDate', DateUtils::DateTimeToUtcIsoDate($toDate));
+        $statement->execute();
+
+        foreach ($statement->fetchAll() as $row) {
+            $result[] = new StockDatapoint(
+                $itemId,
+                DateUtils::IsoDateToUtcDateTime($row['date']),
                 $row['bid'],
                 $row['ask'],
                 $row['sell_listing_volume']

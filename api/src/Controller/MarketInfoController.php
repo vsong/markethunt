@@ -6,7 +6,9 @@ use App\Cache\ICacheService;
 use App\DataService\MarketInfoQueryService;
 use App\DataTransferObject\ItemMarketHistory;
 use App\DataTransferObject\ItemStockHistory;
+use App\Util\DateUtils;
 use App\Util\ResponseUtils;
+use DateInterval;
 use Psr\Container\ContainerInterface;
 use Slim\Http\ServerRequest as Request;
 use Slim\Http\Response as Response;
@@ -84,8 +86,35 @@ class MarketInfoController
             return ResponseUtils::Respond404($response, 'Item ID not found');
         }
 
-        $stockData = $this->marketInfoQueryService->getItemStockHistory($itemId);
-        return $response->withJson(new ItemStockHistory($itemInfo, $stockData));
+        $fromDateString = trim($request->getQueryParam('from', ''));
+        $toDateString = trim($request->getQueryParam('to', ''));
+
+        if (strlen($fromDateString) !== 0 || strlen($toDateString) !== 0) {
+            if (DateUtils::ValidateISODate($fromDateString) && DateUtils::ValidateISODate($toDateString)) {
+                $fromDate = DateUtils::IsoDateToUtcDateTime($fromDateString);
+                $toDate = DateUtils::IsoDateToUtcDateTime($toDateString);
+            } else {
+                return ResponseUtils::Respond400($response, 'From and To dates must be in the format yyyy-mm-dd');
+            }
+
+            if ($fromDate >= $toDate) {
+                return ResponseUtils::Respond400($response, '"From" date must be earlier than "To" date');
+            }
+
+            if ($fromDate < DateUtils::IsoDateToUtcDateTime('2021-12-01')) {
+                return ResponseUtils::Respond404($response, 'Stock data does not exist before December 1, 2021');
+            }
+
+            $stockData = $this->marketInfoQueryService->getItemStockHistory($itemId, $fromDate, $toDate);
+            return $response->withJson(new ItemStockHistory($itemInfo, $stockData));
+        }
+
+        $fineGrainedFromDate = DateUtils::CurrentUtcDateTime()->setTime(0, 0)->sub(new DateInterval('P180D'));
+        $toDate = DateUtils::CurrentUtcDateTime();
+
+        $courseGrainedStockData = $this->marketInfoQueryService->getDailyItemStockHistory($itemId, $fineGrainedFromDate);
+        $fineGrainedStockData = $this->marketInfoQueryService->getItemStockHistory($itemId, $fineGrainedFromDate, $toDate);
+        return $response->withJson(new ItemStockHistory($itemInfo, array_merge($courseGrainedStockData, $fineGrainedStockData)));
     }
 
     public function GetEvents(Request $request, Response $response, $args) {
