@@ -54,12 +54,12 @@
 </section>
 <section>
     <p class="api-link">https://{{api_hostname}}/items/<strong>{itemId}</strong></p>
-    <p>Get information about an item and its marketplace history.</p>
+    <p>Get daily average price and trade volume about an item.</p>
     <p><a href="/items/926">Example</a></p>
 </section>
 <section>
-    <p class="api-link">https://{{api_hostname}}/items/<strong>{itemId}</strong>/stock</p>
-    <p>Get detailed information about an item's historical buy and sell orders.</p>
+    <p class="api-link">https://{{api_hostname}}/items/<strong>{itemId}</strong>/stock[?from=<strong>{yyyy-mm-dd}</strong>&to=<strong>{yyyy-mm-dd}</strong>]</p>
+    <p>Get bi-hourly bid (buy) and ask (sell) data about an item for the most recent 180 days, and averaged daily data afterwards. To query bi-hourly data after 180 days, use the optional <code>from</code> and <code>to</code> query parameters.</p>
     <p><a href="/items/926/stock">Example</a></p>
 </section>
 <section>
@@ -75,7 +75,7 @@
 </section>
 <section>
     <p class="api-link">https://{{api_hostname}}/analytics/movers/<strong>{from}</strong>[/<strong>{to}</strong>]</p>
-    <p>Get price movement information of all active items between two dates. The <code>to</code> date is optional and defaults to today.</p>
+    <p>Get price movement data of all active items between two dates. The <code>to</code> date is optional and defaults to today.</p>
     <p><a href="/analytics/movers/2022-10-01/2022-10-14">Example</a></p>
 </section>
 <h2>Discord Over-the-Counter (OTC) Data</h2>
