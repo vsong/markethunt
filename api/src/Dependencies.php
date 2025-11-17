@@ -14,7 +14,7 @@ class Dependencies
 {
     public static function InjectDependencies(Container $container) {
         $container->set('db', fn() => DatabaseConnectionFactory::Create($_ENV['DB_DSN'], $_ENV['DB_USER'], $_ENV['DB_PASSWORD']));
-        $container->set('marketInfoQueryService', fn() => new MarketInfoQueryService($container->get('db')));
+        $container->set('marketInfoQueryService', fn() => new MarketInfoQueryService($container->get('db'), $_ENV['USE_EVENT_JSON']));
         $container->set('marketAnalyticsQueryService', fn() => new MarketAnalyticsQueryService($container->get('db')));
         $container->set('otcQueryService', fn() => new OtcQueryService($container->get('db')));
         $container->set('apiTokenQueryService', fn() => new ApiTokenQueryService([$_ENV['RESTRICTED_ENDPOINTS_TOKEN']]));

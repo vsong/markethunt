@@ -14,9 +14,11 @@ use PDO;
 class MarketInfoQueryService
 {
     private PDO $db;
+    private bool $useJsonEventData;
 
-    public function __construct(PDO $db) {
+    public function __construct(PDO $db, bool $useJsonEventData) {
         $this->db = $db;
+        $this->useJsonEventData = $useJsonEventData;
     }
 
     /**
@@ -182,6 +184,17 @@ class MarketInfoQueryService
      * @return Event[] Array of Events sorted by start date ascending
      */
     public function getEvents(): array {
+        if ($this->useJsonEventData) {
+            return $this->getEventsFromJson();
+        } else {
+            return $this->getEventsFromDb();
+        }
+    }
+
+    /**
+     * @return Event[]
+     */
+    private function getEventsFromDb(): array {
         /** @var Event[] $result */
         $result = [];
 
@@ -199,6 +212,27 @@ class MarketInfoQueryService
                 $row['short_name'],
                 DateUtils::IsoDateToUtcDateTime($row['start_date']),
                 DateUtils::IsoDateToUtcDateTime($row['end_date'])
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return Event[]
+     */
+    private function getEventsFromJson(): array {
+        /** @var Event[] $result */
+        $result = [];
+
+        $json = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/../data/events.json');
+        $events = json_decode($json, true);
+
+        foreach ($events as $event) {
+            $result[] = new Event(
+                $event['short_name'],
+                DateUtils::IsoDateToUtcDateTime($event['start_date']),
+                DateUtils::IsoDateToUtcDateTime($event['end_date'])
             );
         }
 

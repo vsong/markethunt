@@ -40,6 +40,7 @@ jobs:
         echo "REDIS_PORT=6379" >> $API_ENV
         echo "REDIS_PREFIX=" >> $API_ENV
         echo "SENTRY_DSN=\"${{ secrets.SENTRY_DSN }}\"" >> $API_ENV
+        echo "USE_EVENT_JSON=true" >> $API_ENV
 
     - name: Prepare Frontend config.php
       working-directory: frontend/config
