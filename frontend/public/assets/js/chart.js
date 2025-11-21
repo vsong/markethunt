@@ -63,8 +63,28 @@ function yearLine(year) {
     }
 }
 
-var eventBands = [];
-eventDates.forEach(event => eventBands.push(eventBand(event.short_name, event.start_date, event.end_date)));
+const eventBands = (function() {
+    let eventsPromise = null;
+
+    return function() {
+        if (eventsPromise) {
+            return eventsPromise;
+        }
+
+        const newPromise = fetchApi("/api/events")
+            .then(response => {
+                return response.map(event => eventBand(event.short_name, event.start_date, event.end_date));
+            })
+            .catch(error => {
+                eventsPromise = null;
+                console.error('Error fetching events: ', error);
+                return [];
+            });
+
+        eventsPromise = newPromise;
+        return newPromise;
+    };
+})();
 
 var yearLines = [];
 for (let year = 2008; year < 2099; year++) {
@@ -98,7 +118,7 @@ function renderChartWithItemId(itemId, chartHeaderText) {
     weekGoldVolumeElem.innerHTML = "--";
     loadingElem.style.display = "flex";
     
-    function renderChart(response) {
+    function renderChart(response, eventBands) {
         var daily_prices = [];
         var daily_trade_volume = [];
         var sbi = [];
@@ -466,14 +486,18 @@ function renderChartWithItemId(itemId, chartHeaderText) {
         }
     }
 
-    $.getJSON(`/api/items/${itemId}`, function (response) {
-        var selector = document.getElementById('selected-item');
-        var selectedItemId = selector.dataset.itemId;
+    Promise.all([fetchApi(`/api/items/${itemId}`), eventBands()])
+        .then(([response, eventBands]) => {
+            var selector = document.getElementById('selected-item');
+            var selectedItemId = selector.dataset.itemId;
 
-        if (selectedItemId == null || selectedItemId == itemId) {
-            renderChart(response);
-        }
-    });
+            if (selectedItemId == null || selectedItemId == itemId) {
+                renderChart(response, eventBands);
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        });
 }
 
 function renderBiHourlyStockChart(itemId) {
@@ -482,7 +506,7 @@ function renderBiHourlyStockChart(itemId) {
     const loadingElem = document.getElementsByClassName('chart-loading')[0];
     loadingElem.style.display = "flex";
 
-    function renderChart(response) {
+    function renderChart(response, eventBands) {
         const bid_data = [];
         const ask_data = [];
         const supply_data = [];
@@ -757,12 +781,16 @@ function renderBiHourlyStockChart(itemId) {
         loadingElem.style.display = "none";
     }
 
-    $.getJSON(`/api/items/${itemId}/stock?token=${localStorage.apiToken}`, (response) => {
-        var selector = document.getElementById('selected-item');
-        var selectedItemId = selector.dataset.itemId;
+    Promise.all([fetchApi(`/api/items/${itemId}/stock`), eventBands()])
+        .then(([response, eventBands]) => {
+            var selector = document.getElementById('selected-item');
+            var selectedItemId = selector.dataset.itemId;
 
-        if (selectedItemId == null || selectedItemId == itemId) {
-            renderChart(response);
-        }
-    });
+            if (selectedItemId == null || selectedItemId == itemId) {
+                renderChart(response, eventBands);
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        });
 }

@@ -62,3 +62,14 @@ function unixTimeToIsoString(timestamp) {
     const date = new Date(timestamp);
     return date.toISOString().split('T')[0];
 }
+
+function fetchApi(endpoint) {
+    return fetch(endpoint)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error calling '${endpoint}': ${response.status}`);
+            }
+
+            return response.json();
+        });
+}
