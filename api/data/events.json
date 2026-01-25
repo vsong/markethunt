@@ -178,5 +178,35 @@
     "short_name": "SEH '25",
     "start_date": "2025-04-01",
     "end_date": "2025-04-29"
+  },
+  {
+    "short_name": "KGA '25",
+    "start_date": "2025-05-06",
+    "end_date": "2025-05-20"
+  },
+  {
+    "short_name": "Jaq&Jill '25",
+    "start_date": "2025-06-03",
+    "end_date": "2025-06-17"
+  },
+  {
+    "short_name": "Ronza '25",
+    "start_date": "2025-07-02",
+    "end_date": "2025-07-22"
+  },
+  {
+    "short_name": "Hween '25",
+    "start_date": "2025-10-14",
+    "end_date": "2025-11-12"
+  },
+  {
+    "short_name": "Map '25",
+    "start_date": "2025-11-19",
+    "end_date": "2025-11-26"
+  },
+  {
+    "short_name": "GWH '25",
+    "start_date": "2025-12-09",
+    "end_date": "2026-01-06"
   }
 ]
