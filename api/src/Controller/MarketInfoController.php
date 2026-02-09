@@ -121,6 +121,9 @@ class MarketInfoController
         return $response->withJson($this->marketInfoQueryService->getEvents());
     }
 
+    public function getReleases(Request $request, Response $response, $args) {
+        return $response->withJson($this->marketInfoQueryService->getReleases());
+    }
     public function GetTrendingItems(Request $request, Response $response, $args) {
         $trendingIds = $this->cacheService->getTopViewedItemIds();
         $headers = $this->marketInfoQueryService->getAllItemHeaders();

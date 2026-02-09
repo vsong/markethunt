@@ -65,7 +65,6 @@ var eventDates = {{ event_data | json_encode | raw }};
 
         <script>
             function BiHourlyChartCheckboxClicked(checked) {
-                console.log('called1');
                 const selectedItem = document.getElementById('selected-item');
                 ToggleBiHourlyChart(checked, Number(selectedItem.dataset.itemId));
             }

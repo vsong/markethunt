@@ -1,0 +1,37 @@
+[
+    {
+    "short_name": "CC",
+    "long_name": "Conclusion Cliffs Release",
+    "start_date": "2026-01-13"
+    },
+    {
+    "short_name": "AA/EF",
+    "long_name": "Afterword Acres & Epilogue Falls Release",
+    "start_date": "2025-09-02"
+    },
+    {
+    "short_name": "DD",
+    "long_name": "Draconic Depths Release",
+    "start_date": "2024-08-13"
+    },
+    {
+    "short_name": "SoSo",
+    "long_name": "School of Sorcery Release",
+    "start_date": "2024-04-23"
+    },
+    {
+    "short_name": "BB",
+    "long_name": "Bountiful Beanstalk Release",
+    "start_date": "2023-05-09"
+    },
+    {
+    "short_name": "FoFo",
+    "long_name": "Folklore Forest Trio Release",
+    "start_date": "2022-07-26"
+    },
+    {
+    "short_name": "FI",
+    "long_name": "Floating Islands Release",
+    "start_date": "2020-09-08"
+    }
+]

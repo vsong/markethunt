@@ -16,6 +16,7 @@ var yGridLineColor = "#aaaaaa";
 var yGridLineColorLighter = "#dddddd";
 var axisLabelColor = "#444444";
 var crosshairColor = "#222222";
+var releaseColor = "#aa0000"
 
 var chartFont = "arial, sans-serif";
 
@@ -54,6 +55,13 @@ function eventBand(labelText, IsoStrFrom, IsoStrTo) {
     }
 }
 
+function releaseFlag(short_name, long_name, date){
+    return {
+        x: UtcIsoDateToMillis(date),
+        title: short_name,
+        text: long_name
+    }
+}
 function yearLine(year) {
     return {
         value: UtcIsoDateToMillis(`${year}-01-01`),
@@ -82,6 +90,29 @@ const eventBands = (function() {
             });
 
         eventsPromise = newPromise;
+        return newPromise;
+    };
+})();
+
+const releaseFlags = (function() {
+    let releasePromise = null;
+
+    return function() {
+        if (releasePromise) {
+            return releasePromise;
+        }
+
+        const newPromise = fetchApi("/api/releases")
+            .then(response => {
+                return response.map(release => releaseFlag(release.short_name, release.long_name, release.start_date));
+            })
+            .catch(error => {
+                releasePromise = null;
+                console.error('Error fetching releases: ', error);
+                return [];
+            });
+
+        releasePromise = newPromise;
         return newPromise;
     };
 })();
@@ -118,7 +149,7 @@ function renderChartWithItemId(itemId, chartHeaderText) {
     weekGoldVolumeElem.innerHTML = "--";
     loadingElem.style.display = "flex";
     
-    function renderChart(response, eventBands) {
+    function renderChart(response, eventBands, releaseFlags) {
         var daily_prices = [];
         var daily_trade_volume = [];
         var sbi = [];
@@ -340,7 +371,16 @@ function renderChartWithItemId(itemId, chartHeaderText) {
                                 + ` <b>${sbiText} SB</b><br/>`;
                         },
                     },
-                },
+                }, {
+                    type: 'flags',
+                    name: 'Releases',
+                    data: releaseFlags,
+                    onSeries: 'dailyPrice', 
+                    shape: 'squarepin', 
+                    width: 28,
+                    color: releaseColor,
+                    y:-60
+                }
             ],
             yAxis: [
                 {
@@ -486,13 +526,13 @@ function renderChartWithItemId(itemId, chartHeaderText) {
         }
     }
 
-    Promise.all([fetchApi(`/api/items/${itemId}`), eventBands()])
-        .then(([response, eventBands]) => {
+    Promise.all([fetchApi(`/api/items/${itemId}`), eventBands(), releaseFlags()])
+        .then(([response, eventBands, releaseFlags]) => {
             var selector = document.getElementById('selected-item');
             var selectedItemId = selector.dataset.itemId;
 
             if (selectedItemId == null || selectedItemId == itemId) {
-                renderChart(response, eventBands);
+                renderChart(response, eventBands, releaseFlags);
             }
         })
         .catch(error => {
@@ -506,7 +546,7 @@ function renderBiHourlyStockChart(itemId) {
     const loadingElem = document.getElementsByClassName('chart-loading')[0];
     loadingElem.style.display = "flex";
 
-    function renderChart(response, eventBands) {
+    function renderChart(response, eventBands, releaseFlags) {
         const bid_data = [];
         const ask_data = [];
         const supply_data = [];
@@ -717,7 +757,16 @@ function renderBiHourlyStockChart(itemId) {
                         },
                     },
                     zIndex: 0,
-                },
+                },{
+                    type: 'flags',
+                    name: 'Releases',
+                    data: releaseFlags,
+                    onSeries: 'bid',
+                    shape: 'flag', 
+                    width: 28,
+                    color: releaseColor,
+                    y: -60
+                }
             ],
             yAxis: [
                 {
@@ -781,13 +830,13 @@ function renderBiHourlyStockChart(itemId) {
         loadingElem.style.display = "none";
     }
 
-    Promise.all([fetchApi(`/api/items/${itemId}/stock`), eventBands()])
-        .then(([response, eventBands]) => {
+    Promise.all([fetchApi(`/api/items/${itemId}/stock`), eventBands(), releaseFlags()])
+        .then(([response, eventBands, releaseFlags]) => {
             var selector = document.getElementById('selected-item');
             var selectedItemId = selector.dataset.itemId;
 
             if (selectedItemId == null || selectedItemId == itemId) {
-                renderChart(response, eventBands);
+                renderChart(response, eventBands, releaseFlags);
             }
         })
         .catch(error => {
