@@ -1,28 +1,8 @@
 [
     {
-    "short_name": "CC",
-    "description": "Conclusion Cliffs Release",
-    "release_date": "2026-01-13"
-    },
-    {
-    "short_name": "AA/EF",
-    "description": "Afterword Acres & Epilogue Falls Release",
-    "release_date": "2025-09-02"
-    },
-    {
-    "short_name": "DD",
-    "description": "Draconic Depths Release",
-    "release_date": "2024-08-13"
-    },
-    {
-    "short_name": "SoSo",
-    "description": "School of Sorcery Release",
-    "release_date": "2024-04-23"
-    },
-    {
-    "short_name": "BB",
-    "description": "Bountiful Beanstalk Release",
-    "release_date": "2023-05-09"
+    "short_name": "FI",
+    "description": "Floating Islands Release",
+    "release_date": "2020-09-08"
     },
     {
     "short_name": "FoFo",
@@ -30,8 +10,28 @@
     "release_date": "2022-07-26"
     },
     {
-    "short_name": "FI",
-    "description": "Floating Islands Release",
-    "release_date": "2020-09-08"
+    "short_name": "BB",
+    "description": "Bountiful Beanstalk Release",
+    "release_date": "2023-05-09"
+    },
+    {
+        "short_name": "SoSo",
+        "description": "School of Sorcery Release",
+        "release_date": "2024-04-23"
+    },
+    {
+    "short_name": "DD",
+    "description": "Draconic Depths Release",
+    "release_date": "2024-08-13"
+    },
+    {
+    "short_name": "AA/EF",
+    "description": "Afterword Acres & Epilogue Falls Release",
+    "release_date": "2025-09-02"
+    },
+    {
+    "short_name": "CC",
+    "description": "Conclusion Cliffs Release",
+    "release_date": "2026-01-13"
     }
 ]
