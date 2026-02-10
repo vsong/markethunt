@@ -9,21 +9,22 @@ use JsonSerializable;
 class Release implements JsonSerializable
 {
     public string $shortName;
-    public DateTime $startDate;
+    public string $description;
+    public DateTime $releaseDate;
 
-    public function __construct(string $shortName, string $longName, DateTime $startDate)
+    public function __construct(string $shortName, string $description, DateTime $releaseDate)
     {
         $this->shortName = $shortName;
-        $this->longName = $longName;
-        $this->startDate = $startDate;
+        $this->description = $description;
+        $this->releaseDate = $releaseDate;
     }
 
     public function jsonSerialize(): array
     {
         return [
             'short_name' => $this->shortName,
-            'long_name' => $this->longName,
-            'start_date' => DateUtils::DateTimeToUtcIsoDate($this->startDate),
+            'description' => $this->description,
+            'release_date' => DateUtils::DateTimeToUtcIsoDate($this->releaseDate),
         ];
     }
 }

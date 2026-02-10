@@ -55,11 +55,11 @@ function eventBand(labelText, IsoStrFrom, IsoStrTo) {
     }
 }
 
-function releaseFlag(short_name, long_name, date){
+function releaseFlag(short_name, description, date){
     return {
         x: UtcIsoDateToMillis(date),
         title: short_name,
-        text: long_name
+        text: description
     }
 }
 function yearLine(year) {
@@ -104,7 +104,7 @@ const releaseFlags = (function() {
 
         const newPromise = fetchApi("/api/releases")
             .then(response => {
-                return response.map(release => releaseFlag(release.short_name, release.long_name, release.start_date));
+                return response.map(release => releaseFlag(release.short_name, release.description, release.release_date));
             })
             .catch(error => {
                 releasePromise = null;
@@ -761,7 +761,7 @@ function renderBiHourlyStockChart(itemId) {
                     type: 'flags',
                     name: 'Releases',
                     data: releaseFlags,
-                    onSeries: 'bid',
+                    onSeries: 'ask',
                     shape: 'flag', 
                     width: 28,
                     color: releaseColor,

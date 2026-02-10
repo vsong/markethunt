@@ -261,8 +261,8 @@ class MarketInfoQueryService
         foreach ($releases as $release) {
             $result[] = new Release(
                 $release['short_name'],
-                $release['long_name'],
-                DateUtils::IsoDateToUtcDateTime($release['start_date']),
+                $release['description'],
+                DateUtils::IsoDateToUtcDateTime($release['release_date']),
             );
         }
 
