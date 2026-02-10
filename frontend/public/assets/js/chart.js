@@ -149,24 +149,41 @@ function renderChartWithItemId(itemId, chartHeaderText) {
     weekGoldVolumeElem.innerHTML = "--";
     loadingElem.style.display = "flex";
     
-    function renderChart(response, eventBands, releaseFlags) {
+    function renderChart(response, eventBands, unfilteredReleaseFlags) {
         var daily_prices = [];
         var daily_trade_volume = [];
         var sbi = [];
+
+        var releaseFlags = [];
+        if (!response.market_data || response.market_data.length === 0) {
+            return;
+        }
+        var first_datapoint = UtcIsoDateToMillis(response.market_data[0].date);
+
+        var last_datapoint = UtcIsoDateToMillis(response.market_data[response.market_data.length - 1].date);
+        var borders = {"min":first_datapoint,"max":last_datapoint}
         for (var i = 0; i < response.market_data.length; i++) {
+            var convertedDate = UtcIsoDateToMillis(response.market_data[i].date);
             daily_prices.push([
-                UtcIsoDateToMillis(response.market_data[i].date),
+                convertedDate,
                 Number(response.market_data[i].price)
             ]);
             daily_trade_volume.push([
-                UtcIsoDateToMillis(response.market_data[i].date),
+                convertedDate,
                 Number(response.market_data[i].volume)
             ]);
             sbi.push([
-                UtcIsoDateToMillis(response.market_data[i].date),
+                convertedDate,
                 Number(response.market_data[i].sb_price)
             ]);
+            // Would not be required if data is sorted, but unsure this is enforced
+            if(borders.min > convertedDate){ borders.min = convertedDate;}
+            if(borders.max < convertedDate){ borders.max = convertedDate;}
         }
+        var releaseFlags = unfilteredReleaseFlags.filter(flag =>
+            flag.x >= borders.min && flag.x <= borders.max
+        );
+
 
         Highcharts.setOptions({
             chart: {
@@ -546,16 +563,29 @@ function renderBiHourlyStockChart(itemId) {
     const loadingElem = document.getElementsByClassName('chart-loading')[0];
     loadingElem.style.display = "flex";
 
-    function renderChart(response, eventBands, releaseFlags) {
+    function renderChart(response, eventBands, unfilteredReleaseFlags) {
         const bid_data = [];
         const ask_data = [];
         const supply_data = [];
 
+        var releaseFlags = [];
+        if (!response.stock_data || response.stock_data.length === 0) {
+            return;
+        }
+        var first_datapoint = response.stock_data[0].timestamp;
+        var last_datapoint = response.stock_data[response.stock_data.length - 1].timestamp;
+        var borders = {"min": first_datapoint, "max": last_datapoint};
         response.stock_data.forEach(x => {
             bid_data.push([x.timestamp, x.bid]);
             ask_data.push([x.timestamp, x.ask]);
             supply_data.push([x.timestamp, x.supply]);
+            if(borders.min > x.timestamp){ borders.min = x.timestamp;}
+            if(borders.max < x.timestamp){ borders.max = x.timestamp;}
         })
+
+        var releaseFlags = unfilteredReleaseFlags.filter(flag =>
+            flag.x >= borders.min && flag.x <= borders.max
+        );
 
         Highcharts.setOptions({
             chart: {
