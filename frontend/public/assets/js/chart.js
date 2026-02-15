@@ -176,9 +176,6 @@ function renderChartWithItemId(itemId, chartHeaderText) {
                 convertedDate,
                 Number(response.market_data[i].sb_price)
             ]);
-            // Would not be required if data is sorted, but unsure this is enforced
-            if(borders.min > convertedDate){ borders.min = convertedDate;}
-            if(borders.max < convertedDate){ borders.max = convertedDate;}
         }
         var releaseFlags = unfilteredReleaseFlags.filter(flag =>
             flag.x >= borders.min && flag.x <= borders.max
@@ -579,8 +576,6 @@ function renderBiHourlyStockChart(itemId) {
             bid_data.push([x.timestamp, x.bid]);
             ask_data.push([x.timestamp, x.ask]);
             supply_data.push([x.timestamp, x.supply]);
-            if(borders.min > x.timestamp){ borders.min = x.timestamp;}
-            if(borders.max < x.timestamp){ borders.max = x.timestamp;}
         })
 
         var releaseFlags = unfilteredReleaseFlags.filter(flag =>
