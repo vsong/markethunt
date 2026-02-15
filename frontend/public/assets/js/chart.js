@@ -154,14 +154,6 @@ function renderChartWithItemId(itemId, chartHeaderText) {
         var daily_trade_volume = [];
         var sbi = [];
 
-        var releaseFlags = [];
-        if (!response.market_data || response.market_data.length === 0) {
-            return;
-        }
-        var first_datapoint = UtcIsoDateToMillis(response.market_data[0].date);
-
-        var last_datapoint = UtcIsoDateToMillis(response.market_data[response.market_data.length - 1].date);
-        var borders = {"min":first_datapoint,"max":last_datapoint}
         for (var i = 0; i < response.market_data.length; i++) {
             var convertedDate = UtcIsoDateToMillis(response.market_data[i].date);
             daily_prices.push([
@@ -177,9 +169,17 @@ function renderChartWithItemId(itemId, chartHeaderText) {
                 Number(response.market_data[i].sb_price)
             ]);
         }
-        var releaseFlags = unfilteredReleaseFlags.filter(flag =>
-            flag.x >= borders.min && flag.x <= borders.max
-        );
+
+        var releaseFlags = [];
+        if (!(!response.market_data || response.market_data.length === 0)) {
+            var first_datapoint = UtcIsoDateToMillis(response.market_data[0].date);
+            var last_datapoint = UtcIsoDateToMillis(response.market_data[response.market_data.length - 1].date);
+            var borders = {"min":first_datapoint,"max":last_datapoint}
+            releaseFlags = unfilteredReleaseFlags.filter(flag =>
+                flag.x >= borders.min && flag.x <= borders.max
+            );
+        }
+
 
 
         Highcharts.setOptions({
@@ -566,21 +566,20 @@ function renderBiHourlyStockChart(itemId) {
         const supply_data = [];
 
         var releaseFlags = [];
-        if (!response.stock_data || response.stock_data.length === 0) {
-            return;
+        if (!(!response.stock_data || response.stock_data.length === 0)) {
+            var first_datapoint = response.stock_data[0].timestamp;
+            var last_datapoint = response.stock_data[response.stock_data.length - 1].timestamp;
+            var borders = {"min": first_datapoint, "max": last_datapoint};
+            releaseFlags = unfilteredReleaseFlags.filter(flag =>
+                flag.x >= borders.min && flag.x <= borders.max
+            );
         }
-        var first_datapoint = response.stock_data[0].timestamp;
-        var last_datapoint = response.stock_data[response.stock_data.length - 1].timestamp;
-        var borders = {"min": first_datapoint, "max": last_datapoint};
         response.stock_data.forEach(x => {
             bid_data.push([x.timestamp, x.bid]);
             ask_data.push([x.timestamp, x.ask]);
             supply_data.push([x.timestamp, x.supply]);
         })
 
-        var releaseFlags = unfilteredReleaseFlags.filter(flag =>
-            flag.x >= borders.min && flag.x <= borders.max
-        );
 
         Highcharts.setOptions({
             chart: {
