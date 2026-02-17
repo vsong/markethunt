@@ -4,6 +4,7 @@ namespace App\DataService;
 
 use App\DataTransferObject\ItemHeader;
 use App\Model\Event;
+use App\Model\Release;
 use App\Model\ItemInfo;
 use App\Model\MarketDatapoint;
 use App\Model\StockDatapoint;
@@ -233,6 +234,35 @@ class MarketInfoQueryService
                 $event['short_name'],
                 DateUtils::IsoDateToUtcDateTime($event['start_date']),
                 DateUtils::IsoDateToUtcDateTime($event['end_date'])
+            );
+        }
+
+        return $result;
+    }
+
+        /**
+     * @return Release[] Array of Events sorted by start date ascending
+     */
+    public function getReleases(): array {
+        return $this->getReleasesFromJson();
+    }
+
+
+    /**
+     * @return Release[]
+     */
+    private function getReleasesFromJson(): array {
+        /** @var Release[] $result */
+        $result = [];
+
+        $json = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/../data/releases.json');
+        $releases = json_decode($json, true);
+
+        foreach ($releases as $release) {
+            $result[] = new Release(
+                $release['short_name'],
+                $release['description'],
+                DateUtils::IsoDateToUtcDateTime($release['release_date']),
             );
         }
 

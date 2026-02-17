@@ -16,6 +16,7 @@ var yGridLineColor = "#aaaaaa";
 var yGridLineColorLighter = "#dddddd";
 var axisLabelColor = "#444444";
 var crosshairColor = "#222222";
+var releaseColor = "#aa0000"
 
 var chartFont = "arial, sans-serif";
 
@@ -54,6 +55,13 @@ function eventBand(labelText, IsoStrFrom, IsoStrTo) {
     }
 }
 
+function releaseFlag(short_name, description, date){
+    return {
+        x: UtcIsoDateToMillis(date),
+        title: short_name,
+        text: description
+    }
+}
 function yearLine(year) {
     return {
         value: UtcIsoDateToMillis(`${year}-01-01`),
@@ -82,6 +90,29 @@ const eventBands = (function() {
             });
 
         eventsPromise = newPromise;
+        return newPromise;
+    };
+})();
+
+const releaseFlags = (function() {
+    let releasePromise = null;
+
+    return function() {
+        if (releasePromise) {
+            return releasePromise;
+        }
+
+        const newPromise = fetchApi("/api/releases")
+            .then(response => {
+                return response.map(release => releaseFlag(release.short_name, release.description, release.release_date));
+            })
+            .catch(error => {
+                releasePromise = null;
+                console.error('Error fetching releases: ', error);
+                return [];
+            });
+
+        releasePromise = newPromise;
         return newPromise;
     };
 })();
@@ -118,24 +149,38 @@ function renderChartWithItemId(itemId, chartHeaderText) {
     weekGoldVolumeElem.innerHTML = "--";
     loadingElem.style.display = "flex";
     
-    function renderChart(response, eventBands) {
+    function renderChart(response, eventBands, unfilteredReleaseFlags) {
         var daily_prices = [];
         var daily_trade_volume = [];
         var sbi = [];
+
         for (var i = 0; i < response.market_data.length; i++) {
+            var convertedDate = UtcIsoDateToMillis(response.market_data[i].date);
             daily_prices.push([
-                UtcIsoDateToMillis(response.market_data[i].date),
+                convertedDate,
                 Number(response.market_data[i].price)
             ]);
             daily_trade_volume.push([
-                UtcIsoDateToMillis(response.market_data[i].date),
+                convertedDate,
                 Number(response.market_data[i].volume)
             ]);
             sbi.push([
-                UtcIsoDateToMillis(response.market_data[i].date),
+                convertedDate,
                 Number(response.market_data[i].sb_price)
             ]);
         }
+
+        var releaseFlags = [];
+        if (!(!response.market_data || response.market_data.length === 0)) {
+            var first_datapoint = UtcIsoDateToMillis(response.market_data[0].date);
+            var last_datapoint = UtcIsoDateToMillis(response.market_data[response.market_data.length - 1].date);
+            var borders = {"min":first_datapoint,"max":last_datapoint}
+            releaseFlags = unfilteredReleaseFlags.filter(flag =>
+                flag.x >= borders.min && flag.x <= borders.max
+            );
+        }
+
+
 
         Highcharts.setOptions({
             chart: {
@@ -340,7 +385,16 @@ function renderChartWithItemId(itemId, chartHeaderText) {
                                 + ` <b>${sbiText} SB</b><br/>`;
                         },
                     },
-                },
+                }, {
+                    type: 'flags',
+                    name: 'Releases',
+                    data: releaseFlags,
+                    onSeries: 'dailyPrice', 
+                    shape: 'squarepin', 
+                    width: 28,
+                    color: releaseColor,
+                    y:-60
+                }
             ],
             yAxis: [
                 {
@@ -486,13 +540,13 @@ function renderChartWithItemId(itemId, chartHeaderText) {
         }
     }
 
-    Promise.all([fetchApi(`/api/items/${itemId}`), eventBands()])
-        .then(([response, eventBands]) => {
+    Promise.all([fetchApi(`/api/items/${itemId}`), eventBands(), releaseFlags()])
+        .then(([response, eventBands, releaseFlags]) => {
             var selector = document.getElementById('selected-item');
             var selectedItemId = selector.dataset.itemId;
 
             if (selectedItemId == null || selectedItemId == itemId) {
-                renderChart(response, eventBands);
+                renderChart(response, eventBands, releaseFlags);
             }
         })
         .catch(error => {
@@ -506,16 +560,26 @@ function renderBiHourlyStockChart(itemId) {
     const loadingElem = document.getElementsByClassName('chart-loading')[0];
     loadingElem.style.display = "flex";
 
-    function renderChart(response, eventBands) {
+    function renderChart(response, eventBands, unfilteredReleaseFlags) {
         const bid_data = [];
         const ask_data = [];
         const supply_data = [];
 
+        var releaseFlags = [];
+        if (!(!response.stock_data || response.stock_data.length === 0)) {
+            var first_datapoint = response.stock_data[0].timestamp;
+            var last_datapoint = response.stock_data[response.stock_data.length - 1].timestamp;
+            var borders = {"min": first_datapoint, "max": last_datapoint};
+            releaseFlags = unfilteredReleaseFlags.filter(flag =>
+                flag.x >= borders.min && flag.x <= borders.max
+            );
+        }
         response.stock_data.forEach(x => {
             bid_data.push([x.timestamp, x.bid]);
             ask_data.push([x.timestamp, x.ask]);
             supply_data.push([x.timestamp, x.supply]);
         })
+
 
         Highcharts.setOptions({
             chart: {
@@ -717,7 +781,16 @@ function renderBiHourlyStockChart(itemId) {
                         },
                     },
                     zIndex: 0,
-                },
+                },{
+                    type: 'flags',
+                    name: 'Releases',
+                    data: releaseFlags,
+                    onSeries: 'ask',
+                    shape: 'flag', 
+                    width: 28,
+                    color: releaseColor,
+                    y: -60
+                }
             ],
             yAxis: [
                 {
@@ -781,13 +854,13 @@ function renderBiHourlyStockChart(itemId) {
         loadingElem.style.display = "none";
     }
 
-    Promise.all([fetchApi(`/api/items/${itemId}/stock`), eventBands()])
-        .then(([response, eventBands]) => {
+    Promise.all([fetchApi(`/api/items/${itemId}/stock`), eventBands(), releaseFlags()])
+        .then(([response, eventBands, releaseFlags]) => {
             var selector = document.getElementById('selected-item');
             var selectedItemId = selector.dataset.itemId;
 
             if (selectedItemId == null || selectedItemId == itemId) {
-                renderChart(response, eventBands);
+                renderChart(response, eventBands, releaseFlags);
             }
         })
         .catch(error => {

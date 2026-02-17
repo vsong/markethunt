@@ -9,8 +9,9 @@ Markethunt is a web service that collects data from Mousehunt's in-game marketpl
 
 **Database dumps**: https://cdn.markethunt.win/db_backups/
 
-## Updating MH events
+## Updating MH events & releases
 To add a missing event to the chart, create a pull request for the [events.json](/api/data/events.json) file. Event end times should *not* include ramp-down periods.
+The same applies for new area releases, which can be found in the [releases.json](/api/data/releases.json) file. These include only area releases themselves to avoid overcowding the chart.
 
 ## Installation
 To set up your own development instance of Markethunt, run `init.sh` on a linux machine with `docker` installed and at least 1GB RAM. The web app will be hosted on http://localhost:9002 and the API will be hosted on http://localhost:9001 . The MariaDB container will contain data from the latest DB dump.

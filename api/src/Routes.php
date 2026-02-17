@@ -19,6 +19,7 @@ class Routes
             $group->get('/items/search', [MarketInfoController::class, 'SearchItems']);
             $group->get('/items/{itemId}', [MarketInfoController::class, 'GetItemMarketData']);
             $group->get('/items/{itemId}/stock', [MarketInfoController::class, 'GetItemStockData']);
+            $group->get('/releases', [MarketInfoController::class, 'GetReleases']);
             $group->get('/events', [MarketInfoController::class, 'GetEvents']);
             $group->get('/trending', [MarketInfoController::class, 'GetTrendingItems']);
 

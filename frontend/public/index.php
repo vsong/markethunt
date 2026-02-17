@@ -18,6 +18,5 @@ $current_item_name = getItemName($current_item_id);
 echo $twig->render('index.twig', [
     'current_item_id' => $current_item_id,
     'current_item_name' => $current_item_name,
-    'item_metadata' => getAllItemNamesAndLatestPrice(),
-    'event_data' => getEvents(),
+    'item_metadata' => getAllItemNamesAndLatestPrice()
 ]);
