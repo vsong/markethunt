@@ -208,5 +208,15 @@
     "short_name": "GWH '25",
     "start_date": "2025-12-09",
     "end_date": "2026-01-06"
+  },
+  {
+    "short_name": "LNY '26",
+    "start_date": "2026-02-10",
+    "end_date": "2026-02-24"
+  },
+  {
+    "short_name": "BDay '26",
+    "start_date": "2026-03-03",
+    "end_date": "2026-03-17"
   }
 ]
