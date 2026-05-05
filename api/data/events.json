@@ -218,5 +218,10 @@
     "short_name": "BDay '26",
     "start_date": "2026-03-03",
     "end_date": "2026-03-17"
+  },
+  {
+    "short_name": "SEH '26",
+    "start_date": "2026-03-24",
+    "end_date": "2026-04-21"
   }
 ]
