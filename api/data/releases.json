@@ -15,9 +15,9 @@
     "release_date": "2023-05-09"
     },
     {
-        "short_name": "SoSo",
-        "description": "School of Sorcery Release",
-        "release_date": "2024-04-23"
+    "short_name": "SoSo",
+    "description": "School of Sorcery Release",
+    "release_date": "2024-04-23"
     },
     {
     "short_name": "DD",
@@ -33,5 +33,10 @@
     "short_name": "CC",
     "description": "Conclusion Cliffs Release",
     "release_date": "2026-01-13"
+    },
+    {
+    "short_name": "CS",
+    "description": "Cerulean Skyport Release",
+    "release_date": "2026-07-07"
     }
 ]
